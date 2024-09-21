@@ -6,13 +6,12 @@ import fuzs.iteminteractions.api.v1.provider.impl.ContainerProvider;
 import fuzs.iteminteractions.api.v1.provider.impl.EmptyProvider;
 import fuzs.iteminteractions.api.v1.provider.impl.EnderChestProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
-import fuzs.iteminteractions.impl.capability.ContainerClientInputCapability;
-import fuzs.puzzleslib.api.capability.v3.CapabilityController;
-import fuzs.puzzleslib.api.capability.v3.data.CopyStrategy;
-import fuzs.puzzleslib.api.capability.v3.data.EntityCapabilityKey;
+import fuzs.puzzleslib.api.attachment.v4.DataAttachmentRegistry;
+import fuzs.puzzleslib.api.attachment.v4.DataAttachmentType;
 import fuzs.puzzleslib.api.init.v3.registry.RegistryManager;
 import net.minecraft.core.Holder;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 
 public class ModRegistry {
     static final RegistryManager REGISTRIES = RegistryManager.from(ItemInteractions.MOD_ID);
@@ -37,13 +36,10 @@ public class ModRegistry {
             () -> new ItemContentsProvider.Type(BundleProvider.CODEC)
     );
 
-    static final CapabilityController CAPABILITIES = CapabilityController.from(ItemInteractions.MOD_ID);
-    public static final EntityCapabilityKey<Player, ContainerClientInputCapability> CONTAINER_SLOT_CAPABILITY = CAPABILITIES.registerEntityCapability(
-            "container_client_input",
-            ContainerClientInputCapability.class,
-            ContainerClientInputCapability::new,
-            Player.class
-    ).setCopyStrategy(CopyStrategy.ALWAYS);
+    public static final DataAttachmentType<Entity, Integer> CURRENT_CONTAINER_SLOT_ATTACHMENT_TYPE = DataAttachmentRegistry.<Integer>entityBuilder().defaultValue(
+            EntityType.PLAYER, -1).build(ItemInteractions.id("current_container_slot"));
+    public static final DataAttachmentType<Entity, Boolean> SINGLE_ITEM_MODIFIER_ATTACHMENT_TYPE = DataAttachmentRegistry.<Boolean>entityBuilder().defaultValue(
+            EntityType.PLAYER, false).build(ItemInteractions.id("single_item_modifier"));
 
     public static void touch() {
         // NO-OP

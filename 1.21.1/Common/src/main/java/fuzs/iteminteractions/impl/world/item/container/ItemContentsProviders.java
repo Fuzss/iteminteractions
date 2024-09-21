@@ -7,10 +7,11 @@ import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.network.S2CSyncItemContentsProviders;
-import fuzs.puzzleslib.api.config.v3.json.JsonConfigFileUtil;
+import fuzs.puzzleslib.api.config.v3.json.GsonCodecHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -23,7 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public final class ItemContentsProviders extends SimpleJsonResourceReloadListener {
     public static final ResourceLocation ITEM_CONTAINER_PROVIDER_LOCATION = ItemInteractions.id(
@@ -33,7 +34,7 @@ public final class ItemContentsProviders extends SimpleJsonResourceReloadListene
     private final HolderLookup.Provider registries;
 
     public ItemContentsProviders(HolderLookup.Provider registries) {
-        super(JsonConfigFileUtil.GSON, ITEM_CONTAINER_PROVIDER_LOCATION.getPath());
+        super(GsonCodecHelper.GSON, ITEM_CONTAINER_PROVIDER_LOCATION.getPath());
         this.registries = registries;
     }
 
@@ -70,8 +71,12 @@ public final class ItemContentsProviders extends SimpleJsonResourceReloadListene
         ItemContentsProviders.providers = ImmutableMap.copyOf(providers);
     }
 
-    public static void onAddDataPackReloadListeners(BiConsumer<ResourceLocation, Function<HolderLookup.Provider, PreparableReloadListener>> consumer) {
-        consumer.accept(ITEM_CONTAINER_PROVIDER_LOCATION, ItemContentsProviders::new);
+    public static void onAddDataPackReloadListeners(BiConsumer<ResourceLocation, BiFunction<HolderLookup.Provider, RegistryAccess, PreparableReloadListener>> consumer) {
+        consumer.accept(ITEM_CONTAINER_PROVIDER_LOCATION,
+                (HolderLookup.Provider registries, RegistryAccess registryAccess) -> {
+                    return new ItemContentsProviders(registries);
+                }
+        );
     }
 
     public static void onSyncDataPackContents(ServerPlayer player, boolean joined) {

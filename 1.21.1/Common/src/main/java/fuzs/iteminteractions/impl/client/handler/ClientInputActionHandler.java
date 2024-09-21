@@ -8,7 +8,6 @@ import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.network.client.C2SContainerClientInputMessage;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
-import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
@@ -35,7 +34,7 @@ public class ClientInputActionHandler {
         // this must be sent before any slot click action is performed server side, by vanilla this can be caused by either mouse clicks (normal menu interactions)
         // or key presses (hotbar keys for swapping items to those slots)
         // this is already added via mixin to where vanilla sends the click packet, but creative screen doesn't use it, and you never know with other mods...
-        ensureHasSentContainerClientInput(screen, screen.minecraft.player);
+        ensureHasSentContainerClientInput(screen, screen.minecraft.player, false);
         return EventResult.PASS;
     }
 
@@ -43,7 +42,7 @@ public class ClientInputActionHandler {
         // this must be sent before any slot click action is performed server side, by vanilla this can be caused by either mouse clicks (normal menu interactions)
         // or key presses (hotbar keys for swapping items to those slots)
         // this is already added via mixin to where vanilla sends the click packet, but creative screen doesn't use it, and you never know with other mods...
-        ensureHasSentContainerClientInput(screen, screen.minecraft.player);
+        ensureHasSentContainerClientInput(screen, screen.minecraft.player, false);
         return EventResult.PASS;
     }
 
@@ -79,11 +78,9 @@ public class ClientInputActionHandler {
                 if (!ItemContentsProviders.get(screen.getMenu().getCarried()).isEmpty() || !ItemContentsProviders.get(
                         hoveredSlot.getItem()).isEmpty()) {
                     int mouseButton = (ItemInteractions.CONFIG.get(ClientConfig.class).invertPrecisionModeScrolling ? verticalAmount < 0.0 : verticalAmount > 0.0) ? InputConstants.MOUSE_BUTTON_RIGHT : InputConstants.MOUSE_BUTTON_LEFT;
-                    // Fabric fails to send the selected container slot before items are extracted / inserted
+                    // sometimes fails to send the selected container slot before items are extracted / inserted
                     // no clue why this happens, but this seems to fix it for now
-                    if (ModLoaderEnvironment.INSTANCE.getModLoader().isFabricLike()) {
-                        ensureHasSentContainerClientInput(screen, screen.minecraft.player);
-                    }
+                    ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
                     screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ClickType.PICKUP);
                     return EventResult.INTERRUPT;
                 }
@@ -100,11 +97,9 @@ public class ClientInputActionHandler {
                         .getItemContainerView(itemStack, screen.minecraft.player);
                 currentContainerSlot = ContainerSlotHelper.findClosestSlotWithContent(container, currentContainerSlot, verticalAmount < 0.0);
                 ContainerSlotHelper.setCurrentContainerSlot(screen.minecraft.player, currentContainerSlot);
-                // Fabric fails to send the selected container slot before items are extracted / inserted
+                // sometimes fails to send the selected container slot before items are extracted / inserted
                 // no clue why this happens, but this seems to fix it for now
-                if (ModLoaderEnvironment.INSTANCE.getModLoader().isFabricLike()) {
-                    ensureHasSentContainerClientInput(screen, screen.minecraft.player);
-                }
+                ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
                 return EventResult.INTERRUPT;
             }
         }
@@ -142,11 +137,11 @@ public class ClientInputActionHandler {
         return ItemInteractions.CONFIG.get(ServerConfig.class).allowPrecisionMode && ItemInteractions.CONFIG.get(ClientConfig.class).precisionMode.isActive();
     }
 
-    public static void ensureHasSentContainerClientInput(Screen screen, Player player) {
+    public static void ensureHasSentContainerClientInput(Screen screen, Player player, boolean alwaysSendMessage) {
         if (!(screen instanceof AbstractContainerScreen<?>)) return;
         int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(player);
         boolean extractSingleItem = precisionModeAllowedAndActive();
-        if (currentContainerSlot != lastSentContainerSlot || extractSingleItem != lastSentExtractSingleItem) {
+        if (alwaysSendMessage || currentContainerSlot != lastSentContainerSlot || extractSingleItem != lastSentExtractSingleItem) {
             lastSentContainerSlot = currentContainerSlot;
             lastSentExtractSingleItem = extractSingleItem;
             // this is where the client sets this value, so it's important to call before click actions even when syncing isn't so important (applies mostly to creative menu)

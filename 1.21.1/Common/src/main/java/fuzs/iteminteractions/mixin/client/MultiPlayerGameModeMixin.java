@@ -21,7 +21,7 @@ abstract class MultiPlayerGameModeMixin {
     @Inject(method = "handleInventoryMouseClick", at = @At("HEAD"))
     public void handleInventoryMouseClick(int containerId, int slotId, int mouseButton, ClickType clickType, Player player, CallbackInfo callback) {
         if (containerId == player.containerMenu.containerId) {
-            ClientInputActionHandler.ensureHasSentContainerClientInput(this.minecraft.screen, player);
+            ClientInputActionHandler.ensureHasSentContainerClientInput(this.minecraft.screen, player, false);
         }
     }
 }

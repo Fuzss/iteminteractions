@@ -29,18 +29,18 @@ public class ContainerSlotHelper {
     }
 
     public static void setCurrentContainerSlot(Player player, int slot) {
-        ModRegistry.CONTAINER_SLOT_CAPABILITY.get(player).setCurrentSlot(slot);
+        ModRegistry.CURRENT_CONTAINER_SLOT_ATTACHMENT_TYPE.set(player, slot);
     }
 
     public static void extractSingleItem(Player player, boolean singleItem) {
-        ModRegistry.CONTAINER_SLOT_CAPABILITY.get(player).extractSingleItem(singleItem);
+        ModRegistry.SINGLE_ITEM_MODIFIER_ATTACHMENT_TYPE.set(player, singleItem);
     }
 
     public static int getCurrentContainerSlot(Player player) {
-        return ModRegistry.CONTAINER_SLOT_CAPABILITY.get(player).getCurrentSlot();
+        return ModRegistry.CURRENT_CONTAINER_SLOT_ATTACHMENT_TYPE.getOrDefault(player, -1);
     }
 
     public static boolean extractSingleItemOnly(Player player) {
-        return ModRegistry.CONTAINER_SLOT_CAPABILITY.get(player).extractSingleItemOnly();
+        return ModRegistry.SINGLE_ITEM_MODIFIER_ATTACHMENT_TYPE.getOrDefault(player, false);
     }
 }
