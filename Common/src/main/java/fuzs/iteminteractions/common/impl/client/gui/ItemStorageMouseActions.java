@@ -208,15 +208,20 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             return false;
         }
 
+        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         Slot slot = this.screen.hoveredSlot;
-        if (slot != null && ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly()) {
-            int wheel = this.onMouseScroll(scrollX, scrollY);
-            if (wheel != 0) {
-                int buttonNum = this.getMouseButtonFromWheel(wheel);
-                this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
-            }
+        if (slot != null && slotIndex.isPresent() && ItemInteractions.CONFIG.get(ClientConfig.class)
+                .extractSingleItemOnly()) {
+            if (holder.allowModification(itemStack, this.screen.minecraft.player) && slot.index == slotIndex.getAsInt()
+                    && ItemDecorationsHelper.allowSlotModification(slot, itemStack, this.screen.minecraft.player)) {
+                int wheel = this.onMouseScroll(scrollX, scrollY);
+                if (wheel != 0) {
+                    int buttonNum = this.getMouseButtonFromWheel(wheel);
+                    this.screen.slotClicked(slot, slotIndex.getAsInt(), buttonNum, ContainerInput.PICKUP);
+                }
 
-            return true;
+                return true;
+            }
         }
 
         if (itemStack == this.screen.getMenu().getCarried()
@@ -224,7 +229,6 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             return false;
         }
 
-        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         if (this.allowModification(holder, slot, slotIndex, itemStack)) {
             int wheel = this.onMouseScroll(scrollX, scrollY);
             if (wheel != 0) {
