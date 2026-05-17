@@ -92,7 +92,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      */
     public boolean canAcceptItem(ItemStack itemStack, ItemStack otherItem, Player player) {
         return !otherItem.isEmpty() && this.allowModification(itemStack, player) && this.storage()
-                .isItemAllowedInContainer(otherItem);
+                .mayPlace(otherItem);
     }
 
     /**

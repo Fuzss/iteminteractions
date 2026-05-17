@@ -1,11 +1,9 @@
 package fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip;
 
 import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.ItemContentsTooltip;
-import fuzs.iteminteractions.common.api.v2.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.SlotHighlight;
-import net.minecraft.client.color.ColorLerper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip;
@@ -17,9 +15,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -40,23 +36,8 @@ public class ClientItemContentsTooltip implements ClientTooltipComponent {
         this.selectedItem = tooltip.selectedItem();
         this.gridWidth = tooltip.gridWidth();
         this.gridHeight = tooltip.gridHeight();
-        this.backgroundColor = computeBackgroundColor(tooltip.dyeColor());
-    }
-
-    public static int computeBackgroundColor(@Nullable DyeBackedColor color) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageColors || color == null) {
-            return -1;
-        } else {
-            DyeColor dyeColor = DyeColor.byName(color.serialize(), null);
-            int colorValue;
-            if (dyeColor != null) {
-                colorValue = ColorLerper.Type.SHEEP.getColor(dyeColor);
-            } else {
-                colorValue = color.getValue();
-            }
-
-            return ARGB.opaque(colorValue);
-        }
+        this.backgroundColor = ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageColors ?
+                ARGB.opaque(tooltip.backgroundColor()) : -1;
     }
 
     @Override

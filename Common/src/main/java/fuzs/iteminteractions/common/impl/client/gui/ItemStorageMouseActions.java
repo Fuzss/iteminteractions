@@ -208,11 +208,10 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             return false;
         }
 
-        if (this.screen.hoveredSlot != null && ItemInteractions.CONFIG.get(ClientConfig.class)
-                .extractSingleItemOnly()) {
+        Slot slot = this.screen.hoveredSlot;
+        if (slot != null && ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly()) {
             int wheel = this.onMouseScroll(scrollX, scrollY);
             if (wheel != 0) {
-                Slot slot = this.screen.hoveredSlot;
                 int buttonNum = this.getMouseButtonFromWheel(wheel);
                 this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
             }
@@ -226,7 +225,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (this.canInteractWith(holder, slotIndex, itemStack)) {
+        if (this.allowModification(holder, slot, slotIndex, itemStack)) {
             int wheel = this.onMouseScroll(scrollX, scrollY);
             if (wheel != 0) {
                 Vector2ic scrollXY;
@@ -245,11 +244,19 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         return false;
     }
 
-    private boolean canInteractWith(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack) {
+    /**
+     * Don't use {@link net.minecraft.world.inventory.AbstractContainerMenu#getSlot(int)} for getting the slot for the
+     * index, it does not work in the creative inventory menu.
+     */
+    private boolean allowModification(ItemStorageHolder holder, @Nullable Slot slot, OptionalInt slotIndex, ItemStack itemStack) {
         if (holder.allowModification(itemStack, this.screen.minecraft.player) && holder.hasContents(itemStack,
                 this.screen.minecraft.player)) {
-            return slotIndex.isEmpty() || ItemDecorationsHelper.allowSlotModification(this.screen.getMenu()
-                    .getSlot(slotIndex.getAsInt()), itemStack, this.screen.minecraft.player);
+            if (slotIndex.isEmpty()) {
+                return true;
+            } else {
+                return slot != null && slot.index == slotIndex.getAsInt()
+                        && ItemDecorationsHelper.allowSlotModification(slot, itemStack, this.screen.minecraft.player);
+            }
         } else {
             return false;
         }
@@ -292,7 +299,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (this.canInteractWith(holder, slotIndex, itemStack)) {
+        if (this.allowModification(holder, this.screen.hoveredSlot, slotIndex, itemStack)) {
             int scrollX = 0;
             int scrollY = 0;
             if (event.isLeft()) {

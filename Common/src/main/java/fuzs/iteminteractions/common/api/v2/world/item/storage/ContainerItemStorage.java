@@ -109,7 +109,7 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     @Override
-    default boolean isItemAllowedInContainer(ItemStack otherItem) {
+    default boolean mayPlace(ItemStack otherItem) {
         return true;
     }
 

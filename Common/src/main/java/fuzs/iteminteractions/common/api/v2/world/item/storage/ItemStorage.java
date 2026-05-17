@@ -69,6 +69,8 @@ public interface ItemStorage {
      * @param itemStack the item stack providing the storage
      * @param player    the player performing the interaction
      * @return are inventory interactions allowed?
+     *
+     * @see Slot#allowModification(Player)
      */
     boolean allowModification(ItemStack itemStack, Player player);
 
@@ -96,8 +98,10 @@ public interface ItemStorage {
      *
      * @param otherItem the stack to be added to the container
      * @return is <code>stack</code> allowed to be added to the container
+     *
+     * @see Slot#mayPlace(ItemStack)
      */
-    boolean isItemAllowedInContainer(ItemStack otherItem);
+    boolean mayPlace(ItemStack otherItem);
 
     /**
      * Get the container implementation provided by <code>containerStack</code> as a {@link SimpleContainer}, must not

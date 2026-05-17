@@ -48,7 +48,7 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public boolean isItemAllowedInContainer(ItemStack otherItem) {
+    public boolean mayPlace(ItemStack otherItem) {
         return false;
     }
 

@@ -2,11 +2,11 @@ package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
 import com.mojang.serialization.MapCodec;
 import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.ItemContentsTooltip;
-import fuzs.iteminteractions.common.api.v2.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -21,7 +21,7 @@ public class EnderChestStorage implements VisualItemStorage {
     /**
      * Ender color from the <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted</a> mod.
      */
-    private static final DyeBackedColor DEFAULT_ENDER_CHEST_COLOR = DyeBackedColor.fromRgb(0X2A6255);
+    private static final int BACKGROUND_COLOR = ARGB.opaque(0X2A6255);
 
     protected EnderChestStorage() {
         // NO-OP
@@ -64,7 +64,7 @@ public class EnderChestStorage implements VisualItemStorage {
                 this.getSelectedItem(itemStack),
                 this.getGridWidth(itemList.size()),
                 this.getGridHeight(itemList.size()),
-                DEFAULT_ENDER_CHEST_COLOR);
+                BACKGROUND_COLOR);
     }
 
     @Override

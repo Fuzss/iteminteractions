@@ -42,6 +42,8 @@ public class ContainerStorage extends ComponentBackedStorage {
                         });
     });
     private static final EquipmentSlot[] EQUIPMENT_SLOTS = EquipmentSlot.values();
+    public static final int DEFAULT_INVENTORY_WIDTH = 9;
+    public static final int DEFAULT_INVENTORY_HEIGHT = 3;
 
     final int inventoryWidth;
     final int inventoryHeight;
@@ -59,7 +61,7 @@ public class ContainerStorage extends ComponentBackedStorage {
     }
 
     public ContainerStorage(@Nullable DyeBackedColor dyeColor, StorageOptions storageOptions) {
-        this(9, 3, dyeColor, storageOptions);
+        this(DEFAULT_INVENTORY_WIDTH, DEFAULT_INVENTORY_HEIGHT, dyeColor, storageOptions);
     }
 
     public ContainerStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor, StorageOptions storageOptions) {
@@ -193,7 +195,11 @@ public class ContainerStorage extends ComponentBackedStorage {
                 this.getSelectedItem(itemStack),
                 this.getGridWidth(itemList.size()),
                 this.getGridHeight(itemList.size()),
-                this.getDyeColor());
+                this.getResolvedDyeColor());
+    }
+
+    public int getResolvedDyeColor() {
+        return this.getDyeColor() != null ? this.getDyeColor().getValue() : -1;
     }
 
     @Override

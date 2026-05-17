@@ -27,9 +27,9 @@ public record StorageOptions(Optional<HolderSet<Item>> items, boolean disallowed
     }
 
     /**
-     * @see Item#canFitInsideContainerItems()
+     * @see net.minecraft.world.inventory.Slot#mayPlace(ItemStack)
      */
-    public boolean canFitInsideContainerItem(ItemStack itemStack) {
+    public boolean mayPlace(ItemStack itemStack) {
         if (!this.disallowed) {
             return this.items.isEmpty() || this.items.filter(itemStack::is).isPresent();
         } else {

@@ -57,7 +57,7 @@ public class ItemDecorationsHelper {
         } else if (!slot.allowModification(player)) {
             return false;
         } else if (slot instanceof CreativeModeInventoryScreen.CustomCreativeSlot) {
-            // Filter out creative mode inventory slots on the client.
+            // The creative mode item list should not be interactable in any way.
             return false;
         } else {
             return true;

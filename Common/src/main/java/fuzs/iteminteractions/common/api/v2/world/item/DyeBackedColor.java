@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.material.MapColor;
 import org.jspecify.annotations.Nullable;
@@ -17,27 +18,31 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * Adapted from {@link net.minecraft.network.chat.TextColor} to use {@link DyeColor} instead of {@link net.minecraft.ChatFormatting}.
+ * Adapted from {@link net.minecraft.network.chat.TextColor} to use {@link DyeColor} instead of
+ * {@link net.minecraft.ChatFormatting}.
  */
 public final class DyeBackedColor {
     private static final String CUSTOM_COLOR_PREFIX = "#";
-    public static final Codec<DyeBackedColor> CODEC = Codec.STRING.comapFlatMap(DyeBackedColor::parseColor, DyeBackedColor::serialize);
+    public static final Codec<DyeBackedColor> CODEC = Codec.STRING.comapFlatMap(DyeBackedColor::parseColor,
+            DyeBackedColor::serialize);
     private static final BiMap<DyeColor, DyeBackedColor> LEGACY_FORMAT_TO_COLOR = Stream.of(DyeColor.values())
-            .collect(ImmutableBiMap.toImmutableBiMap(Function.identity(), formatting -> new DyeBackedColor(formatting.getTextureDiffuseColor(), formatting.getName())));
+            .collect(ImmutableBiMap.toImmutableBiMap(Function.identity(),
+                    (DyeColor color) -> new DyeBackedColor(color.getTextureDiffuseColor(), color.getName())));
     private static final Map<String, DyeBackedColor> NAMED_COLORS = LEGACY_FORMAT_TO_COLOR.values()
             .stream()
-            .collect(ImmutableMap.toImmutableMap(textColor -> textColor.name, Function.identity()));
+            .collect(ImmutableMap.toImmutableMap((DyeBackedColor color) -> color.name, Function.identity()));
 
     private final int value;
-    @Nullable private final String name;
+    @Nullable
+    private final String name;
 
     private DyeBackedColor(int value, String name) {
-        this.value = value & 0XFFFFFF;
+        this.value = ARGB.transparent(value);
         this.name = name;
     }
 
     private DyeBackedColor(int value) {
-        this.value = value & 0XFFFFFF;
+        this.value = ARGB.transparent(value);
         this.name = null;
     }
 
@@ -53,7 +58,8 @@ public final class DyeBackedColor {
         return String.format(Locale.ROOT, "%s%06X", CUSTOM_COLOR_PREFIX, this.value);
     }
 
-    @Nullable public DyeColor unwrap() {
+    @Nullable
+    public DyeColor unwrap() {
         return LEGACY_FORMAT_TO_COLOR.inverse().get(this);
     }
 
@@ -62,7 +68,7 @@ public final class DyeBackedColor {
         if (this == object) {
             return true;
         } else if (object != null && this.getClass() == object.getClass()) {
-            DyeBackedColor textColor = (DyeBackedColor)object;
+            DyeBackedColor textColor = (DyeBackedColor) object;
             return this.value == textColor.value;
         } else {
             return false;
@@ -95,13 +101,15 @@ public final class DyeBackedColor {
         if (color.startsWith(CUSTOM_COLOR_PREFIX)) {
             try {
                 int i = Integer.parseInt(color.substring(1), 16);
-                return i >= 0 && i <= 16777215 ? DataResult.success(fromRgb(i), Lifecycle.stable()) : DataResult.error(() -> "Color value out of range: " + color);
+                return i >= 0 && i <= 16777215 ? DataResult.success(fromRgb(i), Lifecycle.stable()) :
+                        DataResult.error(() -> "Color value out of range: " + color);
             } catch (NumberFormatException var2) {
                 return DataResult.error(() -> "Invalid color value: " + color);
             }
         } else {
             DyeBackedColor textColor = NAMED_COLORS.get(color);
-            return textColor == null ? DataResult.error(() -> "Invalid color name: " + color) : DataResult.success(textColor, Lifecycle.stable());
+            return textColor == null ? DataResult.error(() -> "Invalid color name: " + color) :
+                    DataResult.success(textColor, Lifecycle.stable());
         }
     }
 }
