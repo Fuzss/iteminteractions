@@ -15,7 +15,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 /**
  * An almost perfect mirror apart from the custom {@link #KEY_MAPPING}.
  *
- * @see ItemContentsTooltip
+ * @see ItemStorageTooltip
  */
 public enum ItemHeldByCursorTooltip implements BackedKeyType {
     ALWAYS {

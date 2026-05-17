@@ -8,12 +8,10 @@ import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemStorage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import fuzs.puzzleslib.common.api.network.v4.PlayerSet;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.*;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -51,9 +49,9 @@ public final class ItemStorageManager extends UnconditionalSimpleJsonResourceRel
         ItemStorageManager.resolvedDefinitions = ImmutableMap.copyOf(definitions);
     }
 
-    public static void onTagsUpdated(HolderLookup.Provider registries, boolean isClientUpdate) {
+    public static void onServerResourcesLoad(ReloadableServerResources serverResources, RegistryAccess registries) {
         List<Map.Entry<HolderSet<Item>, ItemStorage>> holderSets = unresolvedDefinitions;
-        if (holderSets != null && !isClientUpdate) {
+        if (holderSets != null) {
             Map<Item, ItemStorage> providers = new IdentityHashMap<>();
             for (Map.Entry<HolderSet<Item>, ItemStorage> entry : holderSets) {
                 entry.getKey().forEach((Holder<Item> holder) -> {

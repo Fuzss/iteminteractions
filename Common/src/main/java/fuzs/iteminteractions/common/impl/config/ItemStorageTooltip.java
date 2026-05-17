@@ -17,7 +17,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
  *
  * @see ItemHeldByCursorTooltip
  */
-public enum ItemContentsTooltip implements BackedKeyType {
+public enum ItemStorageTooltip implements BackedKeyType {
     ALWAYS {
         @Override
         public Either<KeyType, KeyMapping> getBackingType() {
@@ -68,7 +68,7 @@ public enum ItemContentsTooltip implements BackedKeyType {
         }
     };
 
-    private static final ItemContentsTooltip[] VALUES = values();
+    private static final ItemStorageTooltip[] VALUES = values();
     public static final KeyMapping KEY_MAPPING = KeyMappingHelper.registerUnboundKeyMapping(ItemInteractions.id(
             "toggle_item_contents_tooltip"));
 

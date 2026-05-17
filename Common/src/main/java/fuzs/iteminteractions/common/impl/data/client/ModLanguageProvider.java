@@ -3,8 +3,8 @@ package fuzs.iteminteractions.common.impl.data.client;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.core.KeyType;
 import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
-import fuzs.iteminteractions.common.impl.config.ItemContentsTooltip;
 import fuzs.iteminteractions.common.impl.config.ItemHeldByCursorTooltip;
+import fuzs.iteminteractions.common.impl.config.ItemStorageTooltip;
 import fuzs.puzzleslib.common.api.client.data.v2.AbstractLanguageProvider;
 import fuzs.puzzleslib.common.api.data.v2.core.DataProviderContext;
 
@@ -23,7 +23,7 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
         builder.add(KeyType.CONTROL_COMPONENT, "Control");
         builder.add(KeyType.COMMAND_COMPONENT, "Command");
         builder.add(KeyType.ALT_COMPONENT, "Alt");
-        builder.add(ItemContentsTooltip.KEY_MAPPING, "Toggle Item Contents Tooltip");
+        builder.add(ItemStorageTooltip.KEY_MAPPING, "Toggle Item Storage Tooltip");
         builder.add(ItemHeldByCursorTooltip.KEY_MAPPING, "Toggle Item Held By Cursor Tooltip");
         builder.addKeyCategory(ItemInteractions.MOD_ID, ItemInteractions.MOD_NAME);
     }

@@ -9,7 +9,7 @@ public class ClientConfig implements ConfigCore {
     private static final String KEY_MESSAGE_TYPE_DESCRIPTION = "Select a modifier key required to be held, otherwise selecting \"KEY\" serves as a toggle. The key mapping is defined in vanilla's controls menu.";
 
     @Config(description = {"Expand item tooltips to show their contents.", KEY_MESSAGE_TYPE_DESCRIPTION})
-    public ItemContentsTooltip itemStorageTooltip = ItemContentsTooltip.ALWAYS;
+    public ItemStorageTooltip itemStorageTooltip = ItemStorageTooltip.ALWAYS;
     @Config(description = "Color item inventories on tooltips according to the container item's color.")
     public boolean itemStorageColors = true;
     @Config(description = "Pick the sprite used for highlighting the currently selected item in item content tooltips.")

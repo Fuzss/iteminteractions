@@ -21,8 +21,8 @@ import fuzs.puzzleslib.common.api.event.v1.entity.player.AfterChangeDimensionCal
 import fuzs.puzzleslib.common.api.event.v1.entity.player.ContainerEvents;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.PlayerCopyEvents;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.PlayerNetworkEvents;
+import fuzs.puzzleslib.common.api.event.v1.server.ServerResourcesLoadCallback;
 import fuzs.puzzleslib.common.api.event.v1.server.SyncDataPackContentsCallback;
-import fuzs.puzzleslib.common.api.event.v1.server.TagsUpdatedCallback;
 import fuzs.puzzleslib.common.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.common.api.resources.v1.PackResourcesHelper;
 import net.minecraft.core.HolderLookup;
@@ -53,7 +53,7 @@ public class ItemInteractions implements ModConstructor {
 
     private static void registerEventHandlers() {
         SyncDataPackContentsCallback.EVENT.register(ItemStorageManager::onSyncDataPackContents);
-        TagsUpdatedCallback.EVENT.register(ItemStorageManager::onTagsUpdated);
+        ServerResourcesLoadCallback.EVENT.register(ItemStorageManager::onServerResourcesLoad);
         ContainerEvents.OPEN.register(EnderChestSyncHandler::onContainerOpen);
         PlayerNetworkEvents.JOIN.register(EnderChestSyncHandler::onPlayerJoin);
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);

@@ -58,6 +58,10 @@ public class ContainerStorage extends ComponentBackedStorage {
         this(inventoryWidth, inventoryHeight, dyeColor, StorageOptions.DEFAULT);
     }
 
+    public ContainerStorage(@Nullable DyeBackedColor dyeColor, StorageOptions storageOptions) {
+        this(9, 3, dyeColor, storageOptions);
+    }
+
     public ContainerStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor, StorageOptions storageOptions) {
         super(storageOptions);
         this.inventoryWidth = inventoryWidth;
@@ -75,7 +79,7 @@ public class ContainerStorage extends ComponentBackedStorage {
 
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, Optional<DyeBackedColor>> backgroundColorCodec() {
         return DyeBackedColor.CODEC.optionalFieldOf("background_color")
-                .forGetter((T storage) -> Optional.ofNullable(storage.dyeColor));
+                .forGetter((T storage) -> Optional.ofNullable(storage.getDyeColor()));
     }
 
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, InteractionPermissions> interactionPermissionsCodec() {
@@ -122,6 +126,10 @@ public class ContainerStorage extends ComponentBackedStorage {
         return this.getInventoryWidth() * this.getInventoryHeight();
     }
 
+    public @Nullable DyeBackedColor getDyeColor() {
+        return this.dyeColor;
+    }
+
     public InteractionPermissions getInteractionPermissions() {
         return this.interactionPermissions;
     }
@@ -134,7 +142,7 @@ public class ContainerStorage extends ComponentBackedStorage {
     public boolean allowModification(ItemStack itemStack, Player player) {
         if (!itemStack.has(DataComponents.CONTAINER)) {
             return false;
-        } else if (!this.interactionPermissions.allowsPlayerInteractions(player)) {
+        } else if (!this.getInteractionPermissions().allowsPlayerInteractions(player)) {
             return false;
         } else if (!this.matchesRequiredEquipmentSlots(itemStack, player)) {
             return false;
@@ -144,11 +152,11 @@ public class ContainerStorage extends ComponentBackedStorage {
     }
 
     private boolean matchesRequiredEquipmentSlots(ItemStack itemStack, Player player) {
-        if (player.getAbilities().instabuild || this.equipmentSlots == EquipmentSlotGroup.ANY) {
+        if (player.getAbilities().instabuild || this.getEquipmentSlots() == EquipmentSlotGroup.ANY) {
             return true;
         } else {
             for (EquipmentSlot slot : EQUIPMENT_SLOTS) {
-                if (this.equipmentSlots.test(slot)) {
+                if (this.getEquipmentSlots().test(slot)) {
                     ItemStack itemInSlot = player.getItemBySlot(slot);
                     if (itemStack == itemInSlot) {
                         return true;
@@ -185,7 +193,7 @@ public class ContainerStorage extends ComponentBackedStorage {
                 this.getSelectedItem(itemStack),
                 this.getGridWidth(itemList.size()),
                 this.getGridHeight(itemList.size()),
-                this.dyeColor);
+                this.getDyeColor());
     }
 
     @Override

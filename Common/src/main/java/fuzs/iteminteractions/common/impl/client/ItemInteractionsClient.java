@@ -8,7 +8,7 @@ import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
 import fuzs.iteminteractions.common.impl.client.handler.ClientEventHandler;
 import fuzs.iteminteractions.common.impl.client.handler.ItemSlotMouseActionHandler;
-import fuzs.iteminteractions.common.impl.config.ItemContentsTooltip;
+import fuzs.iteminteractions.common.impl.config.ItemStorageTooltip;
 import fuzs.iteminteractions.common.impl.config.ItemHeldByCursorTooltip;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
@@ -49,7 +49,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(ItemHeldByCursorTooltip::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(ItemContentsTooltip::onBeforeKeyPressed);
+                .register(ItemStorageTooltip::onBeforeKeyPressed);
         ScreenMouseEvents.beforeMouseScroll(AbstractContainerScreen.class)
                 .register(ItemSlotMouseActionHandler::onBeforeMouseScroll);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
@@ -73,7 +73,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     @Override
     public void onRegisterKeyMappings(KeyMappingsContext context) {
-        context.registerKeyMapping(ItemContentsTooltip.KEY_MAPPING, KeyActivationContext.SCREEN);
+        context.registerKeyMapping(ItemStorageTooltip.KEY_MAPPING, KeyActivationContext.SCREEN);
         context.registerKeyMapping(ItemHeldByCursorTooltip.KEY_MAPPING, KeyActivationContext.SCREEN);
     }
 
