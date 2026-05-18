@@ -52,6 +52,10 @@ public class ContainerStorage extends ComponentBackedStorage {
     InteractionPermissions interactionPermissions = InteractionPermissions.ALWAYS;
     EquipmentSlotGroup equipmentSlots = EquipmentSlotGroup.ANY;
 
+    public ContainerStorage() {
+        this(DEFAULT_INVENTORY_WIDTH, DEFAULT_INVENTORY_HEIGHT);
+    }
+
     public ContainerStorage(int inventoryWidth, int inventoryHeight) {
         this(inventoryWidth, inventoryHeight, null);
     }

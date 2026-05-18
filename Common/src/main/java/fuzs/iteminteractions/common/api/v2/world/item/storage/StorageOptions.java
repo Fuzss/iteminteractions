@@ -11,31 +11,40 @@ import net.minecraft.world.item.ItemStack;
 import java.util.Optional;
 
 public record StorageOptions(Optional<HolderSet<Item>> items, boolean disallowed, boolean filterContainerItems) {
-    public static final StorageOptions DEFAULT = new StorageOptions(Optional.empty(), false, false);
+    public static final StorageOptions DEFAULT = new StorageOptions(Optional.empty(), true, true);
     public static final Codec<StorageOptions> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<StorageOptions> instance) -> instance.group(
-                    RegistryCodecs.homogeneousList(Registries.ITEM)
-                            .lenientOptionalFieldOf("items")
-                            .forGetter((StorageOptions storageOptions) -> storageOptions.items),
-                    Codec.BOOL.lenientOptionalFieldOf("disallowed", false)
-                            .forGetter((StorageOptions storageOptions) -> storageOptions.filterContainerItems),
-                    Codec.BOOL.lenientOptionalFieldOf("filter_container_items", false)
-                            .forGetter((StorageOptions storageOptions) -> storageOptions.filterContainerItems))
-            .apply(instance, StorageOptions::new));
+            RegistryCodecs.homogeneousList(Registries.ITEM)
+                    .lenientOptionalFieldOf("items")
+                    .forGetter(StorageOptions::items),
+            Codec.BOOL.fieldOf("disallowed").orElse(Boolean.TRUE).forGetter(StorageOptions::disallowed),
+            Codec.BOOL.fieldOf("filter_container_items")
+                    .orElse(Boolean.TRUE)
+                    .forGetter(StorageOptions::filterContainerItems)).apply(instance, StorageOptions::new));
 
+    @Deprecated
     public StorageOptions setFilterContainerItems() {
-        return new StorageOptions(this.items, this.disallowed, true);
+        return this.setFilterContainerItems(true);
+    }
+
+    public StorageOptions setFilterContainerItems(boolean filterContainerItems) {
+        return this.filterContainerItems() == filterContainerItems ? this :
+                new StorageOptions(this.items, this.disallowed, filterContainerItems);
     }
 
     /**
      * @see net.minecraft.world.inventory.Slot#mayPlace(ItemStack)
      */
     public boolean mayPlace(ItemStack itemStack) {
-        if (!this.disallowed) {
+        if (!this.canFitInsideContainerItems(itemStack)) {
+            return false;
+        } else if (!this.disallowed) {
             return this.items.isEmpty() || this.items.filter(itemStack::is).isPresent();
         } else {
-            boolean canFitInsideContainerItems =
-                    !this.filterContainerItems || itemStack.getItem().canFitInsideContainerItems();
-            return canFitInsideContainerItems && this.items.filter(itemStack::is).isEmpty();
+            return this.items.filter(itemStack::is).isEmpty();
         }
+    }
+
+    private boolean canFitInsideContainerItems(ItemStack itemStack) {
+        return !this.filterContainerItems() || itemStack.getItem().canFitInsideContainerItems();
     }
 }

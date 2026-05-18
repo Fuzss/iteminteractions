@@ -26,11 +26,13 @@ import fuzs.puzzleslib.common.api.event.v1.server.SyncDataPackContentsCallback;
 import fuzs.puzzleslib.common.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.common.api.resources.v1.PackResourcesHelper;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.ReloadableServerResources;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.TooltipDisplay;
 import org.slf4j.Logger;
@@ -104,7 +106,9 @@ public class ItemInteractions implements ModConstructor {
         }
 
         context.registerItemComponentsPatch((DataComponentGetter components, DataComponentMap.Builder builder, HolderLookup.Provider registries, Item item) -> {
-            if (components.get(DataComponents.CONTAINER) != null) {
+            if (components.get(DataComponents.CONTAINER) != null && registries.get(ItemTags.SHULKER_BOXES)
+                    .filter((HolderSet.Named<Item> holderSet) -> holderSet.contains(item.builtInRegistryHolder()))
+                    .isPresent()) {
                 builder.set(DataComponents.TOOLTIP_DISPLAY,
                         TooltipDisplay.DEFAULT.withHidden(DataComponents.CONTAINER, true));
             }
