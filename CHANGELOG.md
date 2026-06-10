@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix unable to use single item mode via scrolling while the cursor holds the item with contents
+- Fix the dragging feature breaking copying item stacks via dragging the middle mouse button in creative mode
 
 ## [v26.1.2-mc26.1.x] - 2026-05-17
 

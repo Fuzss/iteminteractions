@@ -101,9 +101,8 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         if (ItemStorageHolder.ofItem(itemStack).allowModification(itemStack, this.screen.minecraft.player)) {
             Slot slot = this.screen.getHoveredSlot(event.x(), event.y());
             if (slot != null) {
-                this.clickAction = event.button() == InputConstants.MOUSE_BUTTON_LEFT ? ClickAction.PRIMARY :
-                        ClickAction.SECONDARY;
-                return true;
+                this.clickAction = this.getClickActionFromButtonNum(event.button());
+                return this.clickAction != null;
             }
         }
 
@@ -114,6 +113,14 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         this.clickAction = null;
         this.clickedDraggingSlots.clear();
         this.allDraggingSlots.clear();
+    }
+
+    private @Nullable ClickAction getClickActionFromButtonNum(int buttonNum) {
+        return switch (buttonNum) {
+            case InputConstants.MOUSE_BUTTON_LEFT -> ClickAction.PRIMARY;
+            case InputConstants.MOUSE_BUTTON_RIGHT -> ClickAction.SECONDARY;
+            default -> null;
+        };
     }
 
     @Override

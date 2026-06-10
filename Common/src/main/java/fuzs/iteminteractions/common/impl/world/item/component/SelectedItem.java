@@ -11,9 +11,6 @@ import java.util.Objects;
 
 public abstract sealed class SelectedItem permits SelectedItem.Component, SelectedItem.Attachment {
     public static final int DEFAULT_SELECTED_ITEM = -1;
-    public static final SelectedItem DEFAULT = ofUnchecked(DEFAULT_SELECTED_ITEM);
-    public static final Codec<SelectedItem> CODEC = MapCodec.unitCodec(DEFAULT);
-    public static final StreamCodec<ByteBuf, SelectedItem> STREAM_CODEC = StreamCodec.unit(DEFAULT);
 
     final int selectedItemIndex;
 
@@ -21,22 +18,38 @@ public abstract sealed class SelectedItem permits SelectedItem.Component, Select
         this.selectedItemIndex = selectedItemIndex;
     }
 
+    public static SelectedItem of(int selectedItemIndex) {
+        if (selectedItemIndex == DEFAULT_SELECTED_ITEM) {
+            return defaultSelectedItem();
+        } else if (selectedItemIndex >= 0) {
+            return ofUnchecked(selectedItemIndex);
+        } else {
+            throw new IllegalArgumentException("Invalid selectedItemIndex: " + selectedItemIndex);
+        }
+    }
+
     private static SelectedItem ofUnchecked(int selectedItemIndex) {
-        if (ItemInteractions.CONFIG.get(CommonConfig.class).supportVanillaConnections) {
+        if (ItemInteractions.CONFIG.get(CommonConfig.class).syncedSupportVanillaConnections()) {
             return new Attachment(selectedItemIndex);
         } else {
             return new Component(selectedItemIndex);
         }
     }
 
-    public static SelectedItem of(int selectedItemIndex) {
-        if (selectedItemIndex == DEFAULT_SELECTED_ITEM) {
-            return DEFAULT;
-        } else if (selectedItemIndex >= 0) {
-            return ofUnchecked(selectedItemIndex);
+    public static SelectedItem defaultSelectedItem() {
+        if (ItemInteractions.CONFIG.get(CommonConfig.class).syncedSupportVanillaConnections()) {
+            return Attachment.DEFAULT;
         } else {
-            throw new IllegalArgumentException("Invalid selectedItemIndex: " + selectedItemIndex);
+            return Component.DEFAULT;
         }
+    }
+
+    public static Codec<SelectedItem> codec() {
+        return Component.CODEC;
+    }
+
+    public static StreamCodec<ByteBuf, SelectedItem> streamCodec() {
+        return Component.STREAM_CODEC;
     }
 
     public int selectedItem() {
@@ -49,6 +62,9 @@ public abstract sealed class SelectedItem permits SelectedItem.Component, Select
     }
 
     static final class Component extends SelectedItem {
+        static final SelectedItem DEFAULT = new Component(DEFAULT_SELECTED_ITEM);
+        static final Codec<SelectedItem> CODEC = MapCodec.unitCodec(DEFAULT);
+        static final StreamCodec<ByteBuf, SelectedItem> STREAM_CODEC = StreamCodec.unit(DEFAULT);
 
         Component(int selectedItemIndex) {
             super(selectedItemIndex);
@@ -70,6 +86,7 @@ public abstract sealed class SelectedItem permits SelectedItem.Component, Select
     }
 
     static final class Attachment extends SelectedItem {
+        static final SelectedItem DEFAULT = new Attachment(DEFAULT_SELECTED_ITEM);
 
         Attachment(int selectedItemIndex) {
             super(selectedItemIndex);

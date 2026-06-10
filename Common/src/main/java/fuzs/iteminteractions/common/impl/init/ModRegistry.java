@@ -6,6 +6,7 @@ import fuzs.iteminteractions.common.impl.config.CommonConfig;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentRegistry;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentType;
+import fuzs.puzzleslib.common.api.core.v1.ModLoaderEnvironment;
 import fuzs.puzzleslib.common.api.init.v3.registry.RegistryManager;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
@@ -39,10 +40,12 @@ public class ModRegistry {
             .build(ItemInteractions.id("selected_item"));
 
     public static void bootstrap() {
-        if (!ItemInteractions.CONFIG.get(CommonConfig.class).supportVanillaConnections) {
+        // This must always register on the client, as we need it in singeplayer and don't know whether a server will end up using it.
+        if (ModLoaderEnvironment.INSTANCE.isClient() || !ItemInteractions.CONFIG.get(CommonConfig.class)
+                .supportVanillaConnections()) {
             REGISTRIES.registerDataComponentType("selected_item",
-                    (DataComponentType.Builder<SelectedItem> builder) -> builder.persistent(SelectedItem.CODEC)
-                            .networkSynchronized(SelectedItem.STREAM_CODEC)
+                    (DataComponentType.Builder<SelectedItem> builder) -> builder.persistent(SelectedItem.codec())
+                            .networkSynchronized(SelectedItem.streamCodec())
                             .cacheEncoding());
         }
     }

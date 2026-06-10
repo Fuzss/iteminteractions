@@ -32,18 +32,19 @@ public interface ContainerItemStorage extends ItemStorage {
     @Override
     default int getSelectedItem(ItemStack itemStack, Player player) {
         SelectedItem selectedItem;
-        if (ItemInteractions.CONFIG.get(CommonConfig.class).supportVanillaConnections) {
-            selectedItem = ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.getOrDefault(player, SelectedItem.DEFAULT);
+        if (ItemInteractions.CONFIG.get(CommonConfig.class).syncedSupportVanillaConnections()) {
+            selectedItem = ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.getOrDefault(player,
+                    SelectedItem.defaultSelectedItem());
         } else {
             selectedItem = itemStack.getOrDefault(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(),
-                    SelectedItem.DEFAULT);
+                    SelectedItem.defaultSelectedItem());
         }
 
         return selectedItem.selectedItem();
     }
 
     default void setSelectedItem(ItemStack itemStack, Player player, int selectedItem) {
-        if (ItemInteractions.CONFIG.get(CommonConfig.class).supportVanillaConnections) {
+        if (ItemInteractions.CONFIG.get(CommonConfig.class).syncedSupportVanillaConnections()) {
             ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.set(player, SelectedItem.of(selectedItem));
         } else {
             itemStack.set(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(), SelectedItem.of(selectedItem));
