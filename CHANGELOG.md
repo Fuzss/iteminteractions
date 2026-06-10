@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v26.1.3-mc26.1.x] - 2026-06-10
+
+### Fixed
+
+- Fix unable to use single item mode via scrolling while the cursor holds the item with contents
+
 ## [v26.1.2-mc26.1.x] - 2026-05-17
 
 ### Changed
@@ -47,9 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Greatly improved performance when rendering item contents on tooltips
 - Move the data pack directory from `iteminteractions/item_container_providers` to `iteminteractions/item_storage`
 
-### Fixed
+### Removed
 
-- Fix some quirks with the single item movement, especially when combined with the mouse dragging feature
 - Remove the `allow_slot_cycling` & `selected_item_tooltips` config options, as it's now always enabled to be inline
   with vanilla
 - The `iteminteractions:bundle` type no longer supports defining a `background_color` property
+
+### Fixed
+
+- Fix some quirks with the single item movement, especially when combined with the mouse dragging feature

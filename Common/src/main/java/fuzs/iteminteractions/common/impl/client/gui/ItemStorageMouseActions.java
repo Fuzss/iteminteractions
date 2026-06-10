@@ -210,14 +210,12 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         Slot slot = this.screen.hoveredSlot;
-        if (slot != null && slotIndex.isPresent() && ItemInteractions.CONFIG.get(ClientConfig.class)
-                .extractSingleItemOnly()) {
-            if (holder.allowModification(itemStack, this.screen.minecraft.player) && slot.index == slotIndex.getAsInt()
-                    && ItemDecorationsHelper.allowSlotModification(slot, itemStack, this.screen.minecraft.player)) {
+        if (slot != null && ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly()) {
+            if (this.allowModification(holder, slot, slotIndex, itemStack)) {
                 int wheel = this.onMouseScroll(scrollX, scrollY);
                 if (wheel != 0) {
                     int buttonNum = this.getMouseButtonFromWheel(wheel);
-                    this.screen.slotClicked(slot, slotIndex.getAsInt(), buttonNum, ContainerInput.PICKUP);
+                    this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
                 }
 
                 return true;

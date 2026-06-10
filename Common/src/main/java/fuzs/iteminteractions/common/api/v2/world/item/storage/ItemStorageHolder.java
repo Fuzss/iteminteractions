@@ -40,7 +40,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return the holder that may be empty
      */
     public static ItemStorageHolder ofNullable(@Nullable ItemStorage storage) {
-        return storage != null ? new ItemStorageHolder(storage) : EMPTY;
+        return storage != null && storage != VoidStorage.INSTANCE ? new ItemStorageHolder(storage) : EMPTY;
     }
 
     /**
@@ -91,8 +91,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return can the item be added
      */
     public boolean canAcceptItem(ItemStack itemStack, ItemStack otherItem, Player player) {
-        return !otherItem.isEmpty() && this.allowModification(itemStack, player) && this.storage()
-                .mayPlace(otherItem);
+        return !otherItem.isEmpty() && this.allowModification(itemStack, player) && this.storage().mayPlace(otherItem);
     }
 
     /**
