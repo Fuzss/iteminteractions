@@ -61,7 +61,7 @@ public class EnderChestStorage implements VisualItemStorage {
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList) {
         return new ItemContentsTooltip(itemList,
-                this.getSelectedItem(itemStack),
+                this.getSelectedItem(itemStack, player),
                 this.getGridWidth(itemList.size()),
                 this.getGridHeight(itemList.size()),
                 BACKGROUND_COLOR);

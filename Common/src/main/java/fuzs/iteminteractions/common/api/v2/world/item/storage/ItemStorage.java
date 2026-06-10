@@ -157,19 +157,20 @@ public interface ItemStorage {
      */
     OptionalInt getBarColor(ItemStack itemStack, Player player);
 
-    int getSelectedItem(ItemStack itemStack);
+    int getSelectedItem(ItemStack itemStack, Player player);
 
-    int scrollSelectedItem(ItemStack itemStack, Container container, Vector2ic scrollXY);
+    int scrollSelectedItem(ItemStack itemStack, Player player, Container container, Vector2ic scrollXY);
 
     /**
      * Called when the selected item index for a container item changes from the player scrolling through the tooltip.
      *
      * @param itemStack    the item stack providing the container
+     * @param player       the player
      * @param selectedItem the updated selected slot inside the container item
      * @param slotClicked  the action was triggered by clicking on the item slot
      * @see net.minecraft.world.item.BundleItem#toggleSelectedItem(ItemStack, int)
      */
-    void toggleSelectedItem(ItemStack itemStack, int selectedItem, boolean slotClicked);
+    void toggleSelectedItem(ItemStack itemStack, Player player, int selectedItem, boolean slotClicked);
 
     void playRemoveOneSound(Player player);
 

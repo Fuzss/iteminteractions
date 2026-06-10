@@ -1,5 +1,7 @@
 package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
+import fuzs.iteminteractions.common.impl.ItemInteractions;
+import fuzs.iteminteractions.common.impl.config.CommonConfig;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.world.inventory.ItemSlot;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
@@ -28,26 +30,35 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     @Override
-    default int getSelectedItem(ItemStack itemStack) {
-        return itemStack.getOrDefault(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(), SelectedItem.DEFAULT)
-                .selectedItem();
+    default int getSelectedItem(ItemStack itemStack, Player player) {
+        SelectedItem selectedItem;
+        if (ItemInteractions.CONFIG.get(CommonConfig.class).supportVanillaConnections) {
+            selectedItem = ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.getOrDefault(player, SelectedItem.DEFAULT);
+        } else {
+            selectedItem = itemStack.getOrDefault(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(),
+                    SelectedItem.DEFAULT);
+        }
+
+        return selectedItem.selectedItem();
     }
 
-    default void setSelectedItem(ItemStack itemStack, int selectedItem) {
-        itemStack.set(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(),
-                selectedItem == SelectedItem.DEFAULT_SELECTED_ITEM ? SelectedItem.DEFAULT :
-                        SelectedItem.of(selectedItem));
-    }
-
-    @Override
-    default void toggleSelectedItem(ItemStack itemStack, int selectedItem, boolean slotClicked) {
-        if (!slotClicked) {
-            this.setSelectedItem(itemStack, selectedItem);
+    default void setSelectedItem(ItemStack itemStack, Player player, int selectedItem) {
+        if (ItemInteractions.CONFIG.get(CommonConfig.class).supportVanillaConnections) {
+            ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.set(player, SelectedItem.of(selectedItem));
+        } else {
+            itemStack.set(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(), SelectedItem.of(selectedItem));
         }
     }
 
-    default int getPrioritizedSlot(ItemStack itemStack) {
-        int prioritizedSlot = this.getSelectedItem(itemStack);
+    @Override
+    default void toggleSelectedItem(ItemStack itemStack, Player player, int selectedItem, boolean slotClicked) {
+        if (!slotClicked) {
+            this.setSelectedItem(itemStack, player, selectedItem);
+        }
+    }
+
+    default int getPrioritizedSlot(ItemStack itemStack, Player player) {
+        int prioritizedSlot = this.getSelectedItem(itemStack, player);
         if (this.offsetPrioritizedSlot(prioritizedSlot)) {
             return prioritizedSlot + 1;
         } else {
@@ -55,8 +66,9 @@ public interface ContainerItemStorage extends ItemStorage {
         }
     }
 
-    default void setPrioritizedSlot(ItemStack itemStack, int prioritizedSlot) {
+    default void setPrioritizedSlot(ItemStack itemStack, Player player, int prioritizedSlot) {
         this.setSelectedItem(itemStack,
+                player,
                 this.offsetPrioritizedSlot(prioritizedSlot) ? prioritizedSlot - 1 : prioritizedSlot);
     }
 
@@ -66,8 +78,8 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     @Override
-    default int scrollSelectedItem(ItemStack itemStack, Container container, Vector2ic scrollXY) {
-        int selectedItem = this.getSelectedItem(itemStack);
+    default int scrollSelectedItem(ItemStack itemStack, Player player, Container container, Vector2ic scrollXY) {
+        int selectedItem = this.getSelectedItem(itemStack, player);
         int gridWidth = this.getGridWidth(container.getContainerSize());
         int gridHeight = this.getGridHeight(container.getContainerSize());
         int gridSize = gridWidth * gridHeight;
@@ -177,7 +189,7 @@ public interface ContainerItemStorage extends ItemStorage {
     default boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
         if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
             if (!this.extractSingleItemOnly(player)) {
-                this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM, true);
+                this.toggleSelectedItem(itemStack, player, SelectedItem.DEFAULT_SELECTED_ITEM, true);
                 return false;
             } else {
                 return true;
@@ -220,7 +232,7 @@ public interface ContainerItemStorage extends ItemStorage {
                 this.broadcastChangesOnContainerMenu(itemStack, player);
                 return true;
             } else {
-                this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM, true);
+                this.toggleSelectedItem(itemStack, player, SelectedItem.DEFAULT_SELECTED_ITEM, true);
                 return false;
             }
         }

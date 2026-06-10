@@ -88,17 +88,17 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public int getSelectedItem(ItemStack itemStack) {
+    public int getSelectedItem(ItemStack itemStack, Player player) {
         return SelectedItem.DEFAULT_SELECTED_ITEM;
     }
 
     @Override
-    public int scrollSelectedItem(ItemStack itemStack, Container container, Vector2ic scrollXY) {
-        return this.getSelectedItem(itemStack);
+    public int scrollSelectedItem(ItemStack itemStack, Player player, Container container, Vector2ic scrollXY) {
+        return this.getSelectedItem(itemStack, player);
     }
 
     @Override
-    public void toggleSelectedItem(ItemStack itemStack, int selectedItem, boolean slotClicked) {
+    public void toggleSelectedItem(ItemStack itemStack, Player player, int selectedItem, boolean slotClicked) {
         // NO-OP
     }
 

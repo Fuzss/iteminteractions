@@ -44,6 +44,7 @@ public record ServerboundSelectedItemMessage(OptionalInt slotId,
                     ItemStorageHolder.ofItem(itemStack)
                             .storage()
                             .toggleSelectedItem(itemStack,
+                                    context.player(),
                                     ServerboundSelectedItemMessage.this.selectedItemIndex,
                                     ServerboundSelectedItemMessage.this.slotClicked);
                 }

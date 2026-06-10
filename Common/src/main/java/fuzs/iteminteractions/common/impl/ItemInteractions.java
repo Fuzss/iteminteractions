@@ -2,6 +2,7 @@ package fuzs.iteminteractions.common.impl;
 
 import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
+import fuzs.iteminteractions.common.impl.config.CommonConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.data.DynamicItemStorageDefinitionsProvider;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
@@ -45,6 +46,7 @@ public class ItemInteractions implements ModConstructor {
 
     public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID)
             .client(ClientConfig.class)
+            .common(CommonConfig.class)
             .server(ServerConfig.class);
 
     @Override

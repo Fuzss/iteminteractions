@@ -282,8 +282,9 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
     private void scrollSelectedItem(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack, Vector2ic scrollXY) {
         Container container = holder.getItemContainer(itemStack, this.minecraft.player);
-        int updatedSelectedItem = holder.storage().scrollSelectedItem(itemStack, container, scrollXY);
-        int previousSelectedItem = holder.storage().getSelectedItem(itemStack);
+        int updatedSelectedItem = holder.storage()
+                .scrollSelectedItem(itemStack, this.minecraft.player, container, scrollXY);
+        int previousSelectedItem = holder.storage().getSelectedItem(itemStack, this.minecraft.player);
         if (previousSelectedItem != updatedSelectedItem) {
             this.toggleSelectedItem(itemStack, slotIndex, updatedSelectedItem, false);
         }
@@ -349,7 +350,9 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     }
 
     private void toggleSelectedItem(ItemStack bundleItem, OptionalInt slotIndex, int updatedSelectedItem, boolean slotClicked) {
-        ItemStorageHolder.ofItem(bundleItem).storage().toggleSelectedItem(bundleItem, updatedSelectedItem, slotClicked);
+        ItemStorageHolder.ofItem(bundleItem)
+                .storage()
+                .toggleSelectedItem(bundleItem, this.minecraft.player, updatedSelectedItem, slotClicked);
         MessageSender.broadcast(new ServerboundSelectedItemMessage(slotIndex, updatedSelectedItem, slotClicked));
     }
 }
