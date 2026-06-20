@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v26.1.3-mc26.1.x] - 2026-06-10
+## [v26.1.3-mc26.1.x] - 2026-06-20
 
-### Added
+### Changed
 
-- Add new `support_vanilla_connections` config option
+- The mod once again no longer blocks vanilla clients from connecting to a multiplayer server (at least on Fabric)
+- This is achieved by the removal of the `iteminteractions:selected_item` data component
+- Storing that data is now handled by an attachment on the player once again (which does not use a synced registry)
 
 ### Fixed
 
