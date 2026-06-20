@@ -33,10 +33,10 @@ public final class ItemStackingContext {
     }
 
     public int tryInsert(ItemStack itemStack, ItemStack otherItem, int prioritizedSlot) {
-        int itemLimit = this.getItemCountLimit(itemStack, otherItem);
-        if (itemLimit > 0 && otherItem.getCount() > 0) {
+        int countLimit = this.getInsertCountLimit(itemStack, otherItem);
+        if (countLimit > 0 && otherItem.getCount() > 0) {
             Container container = this.storage.getItemContainer(itemStack, this.player, true);
-            ItemStack item = otherItem.copyWithCount(itemLimit);
+            ItemStack item = otherItem.copyWithCount(countLimit);
             ItemSlot itemSlot = this.addItem(container, item, prioritizedSlot);
             this.storage.setPrioritizedSlot(itemStack, this.player, itemSlot.slotNum());
             return item.getCount() - itemSlot.item().getCount();
@@ -45,10 +45,10 @@ public final class ItemStackingContext {
         }
     }
 
-    private int getItemCountLimit(ItemStack itemStack, ItemStack otherItem) {
-        int itemLimit = Math.min(otherItem.getCount(),
+    private int getInsertCountLimit(ItemStack itemStack, ItemStack otherItem) {
+        int countLimit = Math.min(otherItem.getCount(),
                 this.holder.getAcceptableItemCount(itemStack, otherItem, this.player));
-        return this.storage.extractSingleItemOnly(this.player) ? Math.min(1, itemLimit) : itemLimit;
+        return this.storage.extractSingleItemOnly(itemStack, this.player) ? Math.min(1, countLimit) : countLimit;
     }
 
     /**
@@ -58,17 +58,17 @@ public final class ItemStackingContext {
         Container container = this.storage.getItemContainer(itemStack, this.player, true);
         int slotNum = this.updatePrioritizedSlot(container, itemStack, otherItem);
         if (slotNum != SelectedItem.DEFAULT_SELECTED_ITEM) {
-            ItemStack item = container.getItem(slotNum);
-            int removalCount = this.getItemCountLimit(item);
+            ItemStack slotItem = container.getItem(slotNum);
+            int removalCount = this.getRemoveCountLimit(itemStack, slotItem);
             return new ItemSlot(slotNum, container.removeItem(slotNum, removalCount));
         } else {
             return ItemSlot.EMPTY;
         }
     }
 
-    private int getItemCountLimit(ItemStack itemStack) {
-        int itemLimit = itemStack.getCount();
-        return this.storage.extractSingleItemOnly(this.player) ? Math.min(1, itemLimit) : itemLimit;
+    private int getRemoveCountLimit(ItemStack itemStack, ItemStack otherItem) {
+        int countLimit = otherItem.getCount();
+        return this.storage.extractSingleItemOnly(itemStack, this.player) ? Math.min(1, countLimit) : countLimit;
     }
 
     private int updatePrioritizedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
@@ -81,10 +81,10 @@ public final class ItemStackingContext {
         int startNum = (-1 + offsetDirection) / 2;
         for (int i = 0; i < container.getContainerSize(); i++) {
             int slotNum = Mth.positiveModulo(startNum + i * offsetDirection, container.getContainerSize());
-            ItemStack item = container.getItem(slotNum);
-            if (!item.isEmpty() && this.canCombineItemsInSlot(otherItem, container, slotNum, item)) {
+            ItemStack slotItem = container.getItem(slotNum);
+            if (!slotItem.isEmpty() && this.canCombineItemsInSlot(otherItem, container, slotNum, slotItem)) {
                 // When we empty the slot, cycle to a different one.
-                if (item.getCount() <= this.getItemCountLimit(item)) {
+                if (slotItem.getCount() <= this.getRemoveCountLimit(itemStack, slotItem)) {
                     this.storage.setPrioritizedSlot(itemStack, this.player, SelectedItem.DEFAULT_SELECTED_ITEM);
                 } else {
                     // Otherwise, when not empty, set this as the newly selected item.
@@ -101,10 +101,10 @@ public final class ItemStackingContext {
     private int updatePreviousPrioritizedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
         int prioritizedSlot = this.storage.getPrioritizedSlot(itemStack, this.player);
         if (prioritizedSlot >= 0 && prioritizedSlot < container.getContainerSize()) {
-            ItemStack item = container.getItem(prioritizedSlot);
-            if (!item.isEmpty() && this.canCombineItemsInSlot(otherItem, container, prioritizedSlot, item)) {
+            ItemStack slotItem = container.getItem(prioritizedSlot);
+            if (!slotItem.isEmpty() && this.canCombineItemsInSlot(otherItem, container, prioritizedSlot, slotItem)) {
                 // When we empty the slot, cycle to a different one.
-                if (item.getCount() <= this.getItemCountLimit(item)) {
+                if (slotItem.getCount() <= this.getRemoveCountLimit(itemStack, slotItem)) {
                     int updatedSelectedItem = this.storage.scrollSelectedItem(itemStack,
                             this.player,
                             container,

@@ -23,7 +23,7 @@ public interface ContainerItemStorage extends ItemStorage {
 
     int getGridHeight(int itemCount);
 
-    default boolean extractSingleItemOnly(Player player) {
+    default boolean extractSingleItemOnly(ItemStack itemStack, Player player) {
         return ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.has(player);
     }
 
@@ -135,11 +135,12 @@ public interface ContainerItemStorage extends ItemStorage {
     default boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
         ItemStackingContext context = new ItemStackingContext(holder, this, player);
         ItemStack otherItem = slot.getItem();
-        if (clickAction == ClickAction.PRIMARY && (!otherItem.isEmpty() || this.extractSingleItemOnly(player))) {
+        if (clickAction == ClickAction.PRIMARY && (!otherItem.isEmpty() || this.extractSingleItemOnly(itemStack,
+                player))) {
             otherItem = slot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
             int transferredCount = context.tryInsert(itemStack, otherItem);
             otherItem.shrink(transferredCount);
-            if (!this.extractSingleItemOnly(player)) {
+            if (!this.extractSingleItemOnly(itemStack, player)) {
                 if (transferredCount > 0) {
                     this.playInsertSound(player);
                 } else {
@@ -150,12 +151,12 @@ public interface ContainerItemStorage extends ItemStorage {
             slot.safeInsert(otherItem);
             this.broadcastChangesOnContainerMenu(itemStack, player);
             return true;
-        } else if (clickAction == ClickAction.SECONDARY && (otherItem.isEmpty()
-                || this.extractSingleItemOnly(player))) {
+        } else if (clickAction == ClickAction.SECONDARY && (otherItem.isEmpty() || this.extractSingleItemOnly(itemStack,
+                player))) {
             ItemSlot itemSlot = context.removeOne(itemStack, otherItem);
             if (!itemSlot.item().isEmpty()) {
                 context.tryInsert(itemStack, slot.safeInsert(itemSlot.item()), itemSlot.slotNum());
-                if (!this.extractSingleItemOnly(player)) {
+                if (!this.extractSingleItemOnly(itemStack, player)) {
                     this.playRemoveOneSound(player);
                 }
             }
@@ -174,7 +175,7 @@ public interface ContainerItemStorage extends ItemStorage {
     @Override
     default boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
         if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
-            if (!this.extractSingleItemOnly(player)) {
+            if (!this.extractSingleItemOnly(itemStack, player)) {
                 this.toggleSelectedItem(itemStack, player, SelectedItem.DEFAULT_SELECTED_ITEM, true);
                 return false;
             } else {
@@ -186,7 +187,7 @@ public interface ContainerItemStorage extends ItemStorage {
                 if (slot.allowModification(player)) {
                     int transferredCount = context.tryInsert(itemStack, itemHeldByCursor);
                     itemHeldByCursor.shrink(transferredCount);
-                    if (!this.extractSingleItemOnly(player)) {
+                    if (!this.extractSingleItemOnly(itemStack, player)) {
                         if (transferredCount > 0) {
                             this.playInsertSound(player);
                         } else {
@@ -198,7 +199,7 @@ public interface ContainerItemStorage extends ItemStorage {
                 this.broadcastChangesOnContainerMenu(itemStack, player);
                 return true;
             } else if (clickAction == ClickAction.SECONDARY && (itemHeldByCursor.isEmpty()
-                    || this.extractSingleItemOnly(player))) {
+                    || this.extractSingleItemOnly(itemStack, player))) {
                 if (slot.allowModification(player)) {
                     ItemStack itemRemainder = context.removeOne(itemStack, itemHeldByCursor).item();
                     if (!itemRemainder.isEmpty()) {
@@ -209,7 +210,7 @@ public interface ContainerItemStorage extends ItemStorage {
                             itemHeldByCursor.grow(itemRemainder.getCount());
                         }
 
-                        if (!this.extractSingleItemOnly(player)) {
+                        if (!this.extractSingleItemOnly(itemStack, player)) {
                             this.playRemoveOneSound(player);
                         }
                     }
