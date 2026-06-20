@@ -73,7 +73,7 @@ public class ClientEventHandler {
     }
 
     private static boolean isDragging() {
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen) {
+        if (Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> screen) {
             for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
                 if (itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction
                         && customMouseAction.isDragging()) {

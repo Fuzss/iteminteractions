@@ -22,7 +22,7 @@ public class ItemSlotMouseActionHandler {
         }
     }
 
-    public static void onRenderContainerScreenContents(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+    public static void onExtractContainerScreenContents(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
             if (itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction) {
                 customMouseAction.onExtractContents(guiGraphics, mouseX, mouseY, ScreenHelper.getPartialTick());

@@ -26,7 +26,7 @@ public class ItemDecorationsHelper {
         }
 
         Minecraft minecraft = Minecraft.getInstance();
-        if (!(minecraft.screen instanceof AbstractContainerScreen<?> screen)) {
+        if (!(minecraft.gui.screen() instanceof AbstractContainerScreen<?> screen)) {
             return;
         }
 
