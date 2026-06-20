@@ -1,7 +1,5 @@
 package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
-import fuzs.iteminteractions.common.impl.ItemInteractions;
-import fuzs.iteminteractions.common.impl.config.CommonConfig;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.world.inventory.ItemSlot;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
@@ -31,24 +29,11 @@ public interface ContainerItemStorage extends ItemStorage {
 
     @Override
     default int getSelectedItem(ItemStack itemStack, Player player) {
-        SelectedItem selectedItem;
-        if (ItemInteractions.CONFIG.get(CommonConfig.class).syncedSupportVanillaConnections()) {
-            selectedItem = ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.getOrDefault(player,
-                    SelectedItem.defaultSelectedItem());
-        } else {
-            selectedItem = itemStack.getOrDefault(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(),
-                    SelectedItem.defaultSelectedItem());
-        }
-
-        return selectedItem.selectedItem();
+        return ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.getOrDefault(player, SelectedItem.DEFAULT).selectedItem();
     }
 
     default void setSelectedItem(ItemStack itemStack, Player player, int selectedItem) {
-        if (ItemInteractions.CONFIG.get(CommonConfig.class).syncedSupportVanillaConnections()) {
-            ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.set(player, SelectedItem.of(selectedItem));
-        } else {
-            itemStack.set(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(), SelectedItem.of(selectedItem));
-        }
+        ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.set(player, SelectedItem.of(selectedItem));
     }
 
     @Override

@@ -2,7 +2,6 @@ package fuzs.iteminteractions.common.impl;
 
 import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
-import fuzs.iteminteractions.common.impl.config.CommonConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.data.DynamicItemStorageDefinitionsProvider;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
@@ -13,8 +12,6 @@ import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemStorage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundEnderChestContentMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
-import fuzs.iteminteractions.common.impl.network.config.ClientboundCommonConfigMessage;
-import fuzs.iteminteractions.common.impl.network.config.CommonConfigTask;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.common.api.core.v1.ModConstructor;
@@ -24,7 +21,6 @@ import fuzs.puzzleslib.common.api.event.v1.entity.player.AfterChangeDimensionCal
 import fuzs.puzzleslib.common.api.event.v1.entity.player.ContainerEvents;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.PlayerCopyEvents;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.PlayerNetworkEvents;
-import fuzs.puzzleslib.common.api.event.v1.server.RegisterConfigurationTasksCallback;
 import fuzs.puzzleslib.common.api.event.v1.server.ServerResourcesLoadCallback;
 import fuzs.puzzleslib.common.api.event.v1.server.SyncDataPackContentsCallback;
 import fuzs.puzzleslib.common.api.resources.v1.DynamicPackResources;
@@ -35,17 +31,12 @@ import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.server.network.ConfigurationTask;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.TooltipDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Consumer;
 
 public class ItemInteractions implements ModConstructor {
     public static final String MOD_ID = "iteminteractions";
@@ -54,7 +45,6 @@ public class ItemInteractions implements ModConstructor {
 
     public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID)
             .client(ClientConfig.class)
-            .common(CommonConfig.class)
             .server(ServerConfig.class);
 
     @Override
@@ -64,7 +54,6 @@ public class ItemInteractions implements ModConstructor {
     }
 
     private static void registerEventHandlers() {
-        RegisterConfigurationTasksCallback.EVENT.register(ItemInteractions::onRegisterConfigurationTasks);
         SyncDataPackContentsCallback.EVENT.register(ItemStorageManager::onSyncDataPackContents);
         ServerResourcesLoadCallback.EVENT.register(ItemStorageManager::onServerResourcesLoad);
         ContainerEvents.OPEN.register(EnderChestSyncHandler::onContainerOpen);
@@ -73,14 +62,8 @@ public class ItemInteractions implements ModConstructor {
         PlayerCopyEvents.RESPAWN.register(EnderChestSyncHandler::onRespawn);
     }
 
-    private static void onRegisterConfigurationTasks(MinecraftServer minecraftServer, ServerConfigurationPacketListenerImpl packetListener, Consumer<ConfigurationTask> configurationTaskConsumer) {
-        configurationTaskConsumer.accept(new CommonConfigTask(packetListener));
-    }
-
     @Override
     public void onRegisterPayloadTypes(PayloadTypesContext context) {
-        context.configurationToClient(ClientboundCommonConfigMessage.class,
-                ClientboundCommonConfigMessage.STREAM_CODEC);
         context.playToServer(ServerboundContainerClientInputMessage.class,
                 ServerboundContainerClientInputMessage.STREAM_CODEC);
         context.playToServer(ServerboundSelectedItemMessage.class, ServerboundSelectedItemMessage.STREAM_CODEC);
