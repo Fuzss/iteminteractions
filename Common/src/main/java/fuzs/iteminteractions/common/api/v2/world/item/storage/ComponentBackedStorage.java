@@ -18,9 +18,6 @@ public abstract class ComponentBackedStorage implements VisualItemStorage {
     }
 
     @Override
-    public abstract boolean hasContents(ItemStack itemStack, Player player);
-
-    @Override
     public boolean mayPlace(ItemStack otherItem) {
         return this.storageOptions.mayPlace(otherItem);
     }
