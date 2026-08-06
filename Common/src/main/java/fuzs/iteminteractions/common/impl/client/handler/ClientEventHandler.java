@@ -1,11 +1,14 @@
 package fuzs.iteminteractions.common.impl.client.handler;
 
+import com.google.common.collect.ImmutableMap;
 import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.gui.CustomItemSlotMouseAction;
+import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableValue;
@@ -13,10 +16,15 @@ import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.ItemSlotMouseAction;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -25,10 +33,16 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 public class ClientEventHandler {
     private static final Set<SoundEvent> BUNDLE_SOUNDS = Set.of(SoundEvents.BUNDLE_INSERT,
@@ -83,6 +97,28 @@ public class ClientEventHandler {
         }
 
         return false;
+    }
+
+    public static void onItemTooltip(ItemStack itemStack, List<Component> tooltipLines, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag) {
+        // Hide vanilla shulker box contents on tooltips, they are no longer necessary with our custom rendering.
+        if (itemStack.has(DataComponents.CONTAINER) && !ItemStorageHolder.ofItem(itemStack).isEmpty()) {
+            tooltipLines.removeIf((Component component) -> {
+                if (component.getContents() instanceof TranslatableContents contents) {
+                    return "item.container.item_count".equals(contents.getKey()) || "item.container.more_items".equals(
+                            contents.getKey());
+                } else {
+                    return false;
+                }
+            });
+        }
+    }
+
+    public static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
+        screen.itemSlotMouseActions.addFirst(new ItemStorageMouseActions(screen));
+    }
+
+    public static void onPlayerLeave(LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) {
+        ItemStorageManager.setItemStorageDefinitions(ImmutableMap.of());
     }
 
     /**
