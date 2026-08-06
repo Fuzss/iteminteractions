@@ -13,9 +13,10 @@ public enum SlotHighlight {
 
     @Nullable
     private final Identifier backSprite;
+    @Nullable
     private final Identifier frontSprite;
 
-    SlotHighlight(@Nullable Identifier backSprite, Identifier frontSprite) {
+    SlotHighlight(@Nullable Identifier backSprite, @Nullable Identifier frontSprite) {
         this.backSprite = backSprite;
         this.frontSprite = frontSprite;
     }

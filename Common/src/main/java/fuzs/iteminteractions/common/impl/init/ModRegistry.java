@@ -2,12 +2,12 @@ package fuzs.iteminteractions.common.impl.init;
 
 import fuzs.iteminteractions.common.api.v2.world.item.storage.*;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
+import fuzs.iteminteractions.common.impl.world.item.component.ControlScheme;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentRegistry;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentType;
 import fuzs.puzzleslib.common.api.init.v3.registry.RegistryManager;
 import net.minecraft.core.Holder;
-import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 
 public class ModRegistry {
@@ -27,8 +27,8 @@ public class ModRegistry {
             "bundle",
             () -> new ItemStorageType<>(BundleContentsStorage.CODEC));
 
-    public static final DataAttachmentType<Entity, Unit> MOVE_SINGLE_ITEM_ATTACHMENT_TYPE = DataAttachmentRegistry.<Unit>entityBuilder()
-            .build(ItemInteractions.id("move_single_item"));
+    public static final DataAttachmentType<Entity, ControlScheme> CONTROL_SCHEME_ATTACHMENT_TYPE = DataAttachmentRegistry.<ControlScheme>entityBuilder()
+            .build(ItemInteractions.id("control_scheme"));
     public static final DataAttachmentType<Entity, SelectedItem> SELECTED_ITEM_ATTACHMENT_TYPE = DataAttachmentRegistry.<SelectedItem>entityBuilder()
             .build(ItemInteractions.id("selected_item"));
 

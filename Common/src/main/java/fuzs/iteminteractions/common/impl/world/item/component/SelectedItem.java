@@ -1,10 +1,17 @@
 package fuzs.iteminteractions.common.impl.world.item.component;
 
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+
 import java.util.Objects;
 
 public final class SelectedItem {
     public static final int DEFAULT_SELECTED_ITEM = -1;
     public static final SelectedItem DEFAULT = new SelectedItem(DEFAULT_SELECTED_ITEM);
+    public static final StreamCodec<ByteBuf, SelectedItem> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT,
+            SelectedItem::selectedItem,
+            SelectedItem::new);
 
     final int selectedItemIndex;
 

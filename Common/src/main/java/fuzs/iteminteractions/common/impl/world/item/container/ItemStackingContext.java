@@ -60,7 +60,7 @@ public final class ItemStackingContext {
         if (slotNum != SelectedItem.DEFAULT_SELECTED_ITEM) {
             ItemStack slotItem = container.getItem(slotNum);
             int removalCount = this.getRemoveCountLimit(itemStack, slotItem);
-            return new ItemSlot(slotNum, container.removeItem(slotNum, removalCount));
+            return new ItemSlot(container.removeItem(slotNum, removalCount), slotNum);
         } else {
             return ItemSlot.EMPTY;
         }
@@ -137,7 +137,7 @@ public final class ItemStackingContext {
             if (remainingItems.isEmpty()) {
                 return new ItemSlot(slotNum);
             } else {
-                return new ItemSlot(slotNum, remainingItems);
+                return new ItemSlot(remainingItems, slotNum);
             }
         }
     }

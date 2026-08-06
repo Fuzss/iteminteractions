@@ -16,7 +16,10 @@ import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager
 import fuzs.puzzleslib.common.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.common.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.common.api.core.v1.ModLoaderEnvironment;
-import fuzs.puzzleslib.common.api.core.v1.context.*;
+import fuzs.puzzleslib.common.api.core.v1.context.DataPackReloadListenersContext;
+import fuzs.puzzleslib.common.api.core.v1.context.GameRegistriesContext;
+import fuzs.puzzleslib.common.api.core.v1.context.PackRepositorySourcesContext;
+import fuzs.puzzleslib.common.api.core.v1.context.PayloadTypesContext;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.AfterChangeDimensionCallback;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.ContainerEvents;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.PlayerCopyEvents;
@@ -26,15 +29,8 @@ import fuzs.puzzleslib.common.api.event.v1.server.SyncDataPackContentsCallback;
 import fuzs.puzzleslib.common.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.common.api.resources.v1.PackResourcesHelper;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.component.DataComponentGetter;
-import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.component.TooltipDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,22 +93,6 @@ public class ItemInteractions implements ModConstructor {
                 (DataPackReloadListenersContext.PreparableReloadListenerFactory) (ReloadableServerResources serverResources, HolderLookup.Provider lookupWithUpdatedTags) -> {
                     return new ItemStorageManager(lookupWithUpdatedTags);
                 });
-    }
-
-    @Override
-    public void onRegisterItemComponentPatches(ItemComponentsContext context) {
-        if (!ModLoaderEnvironment.INSTANCE.isDevelopmentEnvironment(MOD_ID)) {
-            return;
-        }
-
-        context.registerItemComponentsPatch((DataComponentGetter components, DataComponentMap.Builder builder, HolderLookup.Provider registries, Item item) -> {
-            if (components.get(DataComponents.CONTAINER) != null && registries.get(ItemTags.SHULKER_BOXES)
-                    .filter((HolderSet.Named<Item> holderSet) -> holderSet.contains(item.builtInRegistryHolder()))
-                    .isPresent()) {
-                builder.set(DataComponents.TOOLTIP_DISPLAY,
-                        TooltipDisplay.DEFAULT.withHidden(DataComponents.CONTAINER, true));
-            }
-        });
     }
 
     public static Identifier id(String path) {
