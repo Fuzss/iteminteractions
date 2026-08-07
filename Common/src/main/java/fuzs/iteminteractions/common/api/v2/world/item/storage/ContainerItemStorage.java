@@ -1,7 +1,9 @@
 package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
+import fuzs.iteminteractions.common.impl.config.ClickActionScheme;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.world.inventory.ItemSlot;
+import fuzs.iteminteractions.common.impl.world.item.component.ControlScheme;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStackingContext;
 import net.minecraft.core.Direction;
@@ -24,7 +26,11 @@ public interface ContainerItemStorage extends ItemStorage {
     int getGridHeight(int itemCount);
 
     default boolean extractSingleItemOnly(ItemStack itemStack, Player player) {
-        return ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.has(player);
+        return ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.getOrDefault(player, ControlScheme.DEFAULT).moveSingleItem();
+    }
+
+    default ClickActionScheme controlScheme(ItemStack itemStack, Player player) {
+        return ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.getOrDefault(player, ControlScheme.DEFAULT).controlScheme();
     }
 
     @Override
@@ -133,14 +139,26 @@ public interface ContainerItemStorage extends ItemStorage {
      */
     @Override
     default boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
+        boolean extractSingleItemOnly = this.extractSingleItemOnly(itemStack, player);
+        ClickActionScheme scheme = this.controlScheme(itemStack, player);
         ItemStackingContext context = new ItemStackingContext(holder, this, player);
         ItemStack otherItem = slot.getItem();
-        if (clickAction == ClickAction.PRIMARY && (!otherItem.isEmpty() || this.extractSingleItemOnly(itemStack,
-                player))) {
+        if (scheme.removeStackedOnOther(clickAction, otherItem, extractSingleItemOnly)) {
+            ItemSlot itemSlot = context.removeOne(itemStack, otherItem);
+            if (!itemSlot.item().isEmpty()) {
+                context.tryInsert(itemStack, slot.safeInsert(itemSlot.item()), itemSlot.slotNum());
+                if (!extractSingleItemOnly) {
+                    this.playRemoveOneSound(player);
+                }
+            }
+
+            this.broadcastChangesOnContainerMenu(itemStack, player);
+            return true;
+        } else if (scheme.insertStackedOnOther(clickAction, otherItem, extractSingleItemOnly)) {
             otherItem = slot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
             int transferredCount = context.tryInsert(itemStack, otherItem);
             otherItem.shrink(transferredCount);
-            if (!this.extractSingleItemOnly(itemStack, player)) {
+            if (!extractSingleItemOnly) {
                 if (transferredCount > 0) {
                     this.playInsertSound(player);
                 } else {
@@ -149,18 +167,6 @@ public interface ContainerItemStorage extends ItemStorage {
             }
 
             slot.safeInsert(otherItem);
-            this.broadcastChangesOnContainerMenu(itemStack, player);
-            return true;
-        } else if (clickAction == ClickAction.SECONDARY && (otherItem.isEmpty() || this.extractSingleItemOnly(itemStack,
-                player))) {
-            ItemSlot itemSlot = context.removeOne(itemStack, otherItem);
-            if (!itemSlot.item().isEmpty()) {
-                context.tryInsert(itemStack, slot.safeInsert(itemSlot.item()), itemSlot.slotNum());
-                if (!this.extractSingleItemOnly(itemStack, player)) {
-                    this.playRemoveOneSound(player);
-                }
-            }
-
             this.broadcastChangesOnContainerMenu(itemStack, player);
             return true;
         } else {
@@ -174,8 +180,10 @@ public interface ContainerItemStorage extends ItemStorage {
      */
     @Override
     default boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
+        boolean extractSingleItemOnly = this.extractSingleItemOnly(itemStack, player);
+        ClickActionScheme scheme = this.controlScheme(itemStack, player);
         if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
-            if (!this.extractSingleItemOnly(itemStack, player)) {
+            if (!extractSingleItemOnly) {
                 this.toggleSelectedItem(itemStack, player, SelectedItem.DEFAULT_SELECTED_ITEM, true);
                 return false;
             } else {
@@ -183,23 +191,7 @@ public interface ContainerItemStorage extends ItemStorage {
             }
         } else {
             ItemStackingContext context = new ItemStackingContext(holder, this, player);
-            if (clickAction == ClickAction.PRIMARY && !itemHeldByCursor.isEmpty()) {
-                if (slot.allowModification(player)) {
-                    int transferredCount = context.tryInsert(itemStack, itemHeldByCursor);
-                    itemHeldByCursor.shrink(transferredCount);
-                    if (!this.extractSingleItemOnly(itemStack, player)) {
-                        if (transferredCount > 0) {
-                            this.playInsertSound(player);
-                        } else {
-                            this.playInsertFailSound(player);
-                        }
-                    }
-                }
-
-                this.broadcastChangesOnContainerMenu(itemStack, player);
-                return true;
-            } else if (clickAction == ClickAction.SECONDARY && (itemHeldByCursor.isEmpty()
-                    || this.extractSingleItemOnly(itemStack, player))) {
+            if (scheme.removeOtherStackedOnMe(clickAction, itemHeldByCursor, extractSingleItemOnly)) {
                 if (slot.allowModification(player)) {
                     ItemStack itemRemainder = context.removeOne(itemStack, itemHeldByCursor).item();
                     if (!itemRemainder.isEmpty()) {
@@ -210,8 +202,23 @@ public interface ContainerItemStorage extends ItemStorage {
                             itemHeldByCursor.grow(itemRemainder.getCount());
                         }
 
-                        if (!this.extractSingleItemOnly(itemStack, player)) {
+                        if (!extractSingleItemOnly) {
                             this.playRemoveOneSound(player);
+                        }
+                    }
+                }
+
+                this.broadcastChangesOnContainerMenu(itemStack, player);
+                return true;
+            } else if (scheme.insertOtherStackedOnMe(clickAction, itemHeldByCursor, extractSingleItemOnly)) {
+                if (slot.allowModification(player)) {
+                    int transferredCount = context.tryInsert(itemStack, itemHeldByCursor);
+                    itemHeldByCursor.shrink(transferredCount);
+                    if (!extractSingleItemOnly) {
+                        if (transferredCount > 0) {
+                            this.playInsertSound(player);
+                        } else {
+                            this.playInsertFailSound(player);
                         }
                     }
                 }

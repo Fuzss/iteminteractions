@@ -2,6 +2,7 @@ package fuzs.iteminteractions.common.impl.config;
 
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.core.SimpleKeyType;
+import fuzs.iteminteractions.common.impl.world.item.component.ControlScheme;
 import fuzs.puzzleslib.common.api.config.v3.Config;
 import fuzs.puzzleslib.common.api.config.v3.ConfigCore;
 
@@ -32,9 +33,18 @@ public class ClientConfig implements ConfigCore {
             KEY_MESSAGE_TYPE_DESCRIPTION
     })
     public ItemHeldByCursorTooltip itemHeldByCursorTooltip = ItemHeldByCursorTooltip.ALT;
+    @Config(description = {
+            "Control the mouse button mappings when moving item contents.",
+            "The split scheme mirrors vanilla's bundle mechanics, while the single scheme maps everything to the right mouse button; providing more overall flexibility."
+    })
+    public ClickActionScheme controlScheme = ControlScheme.DEFAULT.controlScheme();
 
     public boolean extractSingleItemOnly() {
         return this.singleItemMovement.isUsed()
                 && ItemInteractions.CONFIG.get(ServerConfig.class).enableSingleItemMovement;
+    }
+
+    public ControlScheme packControlScheme() {
+        return new ControlScheme(this.extractSingleItemOnly(), this.controlScheme);
     }
 }

@@ -42,7 +42,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(ItemSlotMouseActionHandler::onBeforeKeyPress);
         ScreenEvents.afterBackground(AbstractContainerScreen.class)
                 .register(ItemSlotMouseActionHandler::onAfterBackground);
-        ExtractContainerScreenContentsCallback.EVENT.register(ItemSlotMouseActionHandler::onExtractContainerScreenContents);
+        ExtractContainerScreenContentsCallback.EVENT.register(ItemSlotMouseActionHandler::onAfterForeground);
         ScreenEvents.afterBackground(AbstractContainerScreen.class).register(ClientEventHandler::onAfterBackground);
         PlaySoundEvents.AT_ENTITY.register(ClientEventHandler::onPlaySoundAtEntity);
         ItemTooltipCallback.EVENT.register(ClientEventHandler::onItemTooltip);

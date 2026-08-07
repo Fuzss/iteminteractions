@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.helper.ItemDecorationsHelper;
+import fuzs.iteminteractions.common.impl.config.ClickActionScheme;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
@@ -66,7 +67,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     }
 
     @Override
-    public void onExtractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void onExtractForeground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         if (!this.clickedDraggingSlots.isEmpty()) {
             this.extractSlotHighlights(guiGraphics,
                     mouseX,
@@ -98,10 +99,17 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         this.clearDraggingSlots();
-        if (ItemStorageHolder.ofItem(itemStack).allowModification(itemStack, this.screen.minecraft.player)) {
+        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
+        if (holder.allowModification(itemStack, this.minecraft.player)) {
             Slot slot = this.screen.getHoveredSlot(event.x(), event.y());
             if (slot != null) {
-                this.clickAction = this.getClickActionFromButtonNum(event.button());
+                ClickActionScheme scheme = this.getControlScheme();
+                this.clickAction = this.getClickActionFromScheme(scheme,
+                        event.button(),
+                        slot,
+                        holder,
+                        itemStack,
+                        this.minecraft.player);
                 return this.clickAction != null;
             }
         }
@@ -115,12 +123,50 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         this.allDraggingSlots.clear();
     }
 
+    private @Nullable ClickAction getClickActionFromScheme(ClickActionScheme scheme, int buttonNum, Slot slot, ItemStorageHolder holder, ItemStack itemStack, Player player) {
+        return switch (scheme) {
+            case SPLIT_INPUT -> {
+                yield this.getClickActionFromButtonNum(buttonNum);
+            }
+            case SINGLE_INPUT -> {
+                yield buttonNum == InputConstants.MOUSE_BUTTON_RIGHT ?
+                        this.getClickActionFromSlot(slot, holder, itemStack, player) : null;
+            }
+        };
+    }
+
+    private ClickActionScheme getControlScheme() {
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly()) {
+            return ClickActionScheme.SPLIT_INPUT;
+        } else {
+            return ItemInteractions.CONFIG.get(ClientConfig.class).controlScheme;
+        }
+    }
+
     private @Nullable ClickAction getClickActionFromButtonNum(int buttonNum) {
         return switch (buttonNum) {
             case InputConstants.MOUSE_BUTTON_LEFT -> ClickAction.PRIMARY;
             case InputConstants.MOUSE_BUTTON_RIGHT -> ClickAction.SECONDARY;
             default -> null;
         };
+    }
+
+    private @Nullable ClickAction getClickActionFromSlot(Slot slot, ItemStorageHolder holder, ItemStack itemStack, Player player) {
+        if (this.matchesSecondaryClickAction(slot, holder, itemStack, player)) {
+            return ClickAction.SECONDARY;
+        } else if (this.matchesPrimaryClickAction(slot, holder, itemStack, player)) {
+            return ClickAction.PRIMARY;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean matchesPrimaryClickAction(Slot slot, ItemStorageHolder holder, ItemStack itemStack, Player player) {
+        return slot.hasItem() && holder.canAddItem(itemStack, slot.getItem(), player);
+    }
+
+    private boolean matchesSecondaryClickAction(Slot slot, ItemStorageHolder holder, ItemStack itemStack, Player player) {
+        return !slot.hasItem() && !holder.getItemContainer(itemStack, player).isEmpty();
     }
 
     @Override
@@ -134,12 +180,13 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         this.clearDraggingSlots();
         if (lastClickAction != null) {
             // Play this manually at the end as we suppress all interaction sounds played while dragging.
+            ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
             switch (lastClickAction) {
                 case PRIMARY -> {
-                    ItemStorageHolder.ofItem(itemStack).storage().playInsertSound(this.screen.minecraft.player);
+                    holder.storage().playInsertSound(this.minecraft.player);
                 }
                 case SECONDARY -> {
-                    ItemStorageHolder.ofItem(itemStack).storage().playRemoveOneSound(this.screen.minecraft.player);
+                    holder.storage().playRemoveOneSound(this.minecraft.player);
                 }
             }
         }
@@ -163,14 +210,14 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
         if (this.clickAction != null) {
             ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-            if (!holder.allowModification(itemStack, this.screen.minecraft.player)) {
+            if (!holder.allowModification(itemStack, this.minecraft.player)) {
                 this.clearDraggingSlots();
                 return false;
             }
 
             Slot slot = this.screen.getHoveredSlot(event.x(), event.y());
             if (slot != null && this.screen.getMenu().canDragTo(slot) && !this.allDraggingSlots.contains(slot)) {
-                if (this.shouldSlotBeClicked(this.clickAction, slot, holder, itemStack, this.screen.minecraft.player)) {
+                if (this.shouldSlotBeClicked(this.clickAction, slot, holder, itemStack, this.minecraft.player)) {
                     this.clickedDraggingSlots.add(slot);
                     this.screen.slotClicked(slot, slot.index, event.button(), ContainerInput.PICKUP);
                 }
@@ -186,10 +233,10 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     private boolean shouldSlotBeClicked(ClickAction clickAction, Slot slot, ItemStorageHolder holder, ItemStack itemStack, Player player) {
         return switch (clickAction) {
             case PRIMARY -> {
-                yield slot.hasItem() && holder.canAddItem(itemStack, slot.getItem(), player);
+                yield this.matchesPrimaryClickAction(slot, holder, itemStack, player);
             }
             case SECONDARY -> {
-                yield !slot.hasItem() && !holder.getItemContainer(itemStack, player).isEmpty()
+                yield this.matchesSecondaryClickAction(slot, holder, itemStack, player)
                         || ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly() && holder.hasAnyOf(
                         itemStack,
                         slot.getItem(),
@@ -258,13 +305,13 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
      * index, it does not work in the creative inventory menu.
      */
     private boolean allowModification(ItemStorageHolder holder, @Nullable Slot slot, OptionalInt slotIndex, ItemStack itemStack) {
-        if (holder.allowModification(itemStack, this.screen.minecraft.player) && holder.hasContents(itemStack,
-                this.screen.minecraft.player)) {
+        if (holder.allowModification(itemStack, this.minecraft.player) && holder.hasContents(itemStack,
+                this.minecraft.player)) {
             if (slotIndex.isEmpty()) {
                 return true;
             } else {
                 return slot != null && slot.index == slotIndex.getAsInt()
-                        && ItemDecorationsHelper.allowSlotModification(slot, itemStack, this.screen.minecraft.player);
+                        && ItemDecorationsHelper.allowSlotModification(slot, itemStack, this.minecraft.player);
             }
         } else {
             return false;

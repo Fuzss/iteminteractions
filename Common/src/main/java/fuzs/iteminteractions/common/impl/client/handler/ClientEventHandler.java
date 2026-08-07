@@ -8,6 +8,7 @@ import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
+import fuzs.iteminteractions.common.impl.world.item.component.ControlScheme;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableFloat;
@@ -28,7 +29,6 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerInput;
@@ -40,6 +40,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -49,7 +50,7 @@ public class ClientEventHandler {
             SoundEvents.BUNDLE_INSERT_FAIL,
             SoundEvents.BUNDLE_REMOVE_ONE);
 
-    private static boolean lastSentSingleItemOnly;
+    private static ControlScheme lastSentControlScheme = ControlScheme.DEFAULT;
 
     /**
      * Shows the item tooltip for the item held by the cursor; to be used with the single item moving feature to be able
@@ -134,11 +135,11 @@ public class ClientEventHandler {
      * @see MultiPlayerGameMode#ensureHasSentCarriedItem()
      */
     public static void ensureHasSentContainerClientInput(Player player) {
-        boolean singleItemOnly = ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly();
-        if (singleItemOnly != lastSentSingleItemOnly) {
-            lastSentSingleItemOnly = singleItemOnly;
-            ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.set(player, singleItemOnly ? Unit.INSTANCE : null);
-            MessageSender.broadcast(new ServerboundContainerClientInputMessage(singleItemOnly));
+        ControlScheme controlScheme = ItemInteractions.CONFIG.get(ClientConfig.class).packControlScheme();
+        if (!Objects.equals(controlScheme, lastSentControlScheme)) {
+            lastSentControlScheme = controlScheme;
+            ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.set(player, controlScheme);
+            MessageSender.broadcast(new ServerboundContainerClientInputMessage(controlScheme));
         }
     }
 }

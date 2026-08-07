@@ -30,7 +30,7 @@ public interface CustomItemSlotMouseAction extends ItemSlotMouseAction {
     /**
      * This always runs regardless of {@link #matches(ItemStack)}
      */
-    void onExtractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks);
+    void onExtractForeground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks);
 
     /**
      * This only runs for the {@link AbstractContainerMenu#carried carried item}.
