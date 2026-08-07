@@ -30,7 +30,12 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     default ClickActionScheme controlScheme(ItemStack itemStack, Player player) {
-        return ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.getOrDefault(player, ControlScheme.DEFAULT).controlScheme();
+        if (this.extractSingleItemOnly(itemStack, player)) {
+            return ClickActionScheme.SPLIT_INPUT;
+        } else {
+            return ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.getOrDefault(player, ControlScheme.DEFAULT)
+                    .controlScheme();
+        }
     }
 
     @Override
@@ -143,7 +148,7 @@ public interface ContainerItemStorage extends ItemStorage {
         ClickActionScheme scheme = this.controlScheme(itemStack, player);
         ItemStackingContext context = new ItemStackingContext(holder, this, player);
         ItemStack otherItem = slot.getItem();
-        if (scheme.removeStackedOnOther(clickAction, otherItem, extractSingleItemOnly)) {
+        if (scheme.removeStackedOnOther(clickAction) && (otherItem.isEmpty() || extractSingleItemOnly)) {
             ItemSlot itemSlot = context.removeOne(itemStack, otherItem);
             if (!itemSlot.item().isEmpty()) {
                 context.tryInsert(itemStack, slot.safeInsert(itemSlot.item()), itemSlot.slotNum());
@@ -154,7 +159,7 @@ public interface ContainerItemStorage extends ItemStorage {
 
             this.broadcastChangesOnContainerMenu(itemStack, player);
             return true;
-        } else if (scheme.insertStackedOnOther(clickAction, otherItem, extractSingleItemOnly)) {
+        } else if (scheme.insertStackedOnOther(clickAction) && (!otherItem.isEmpty() || extractSingleItemOnly)) {
             otherItem = slot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
             int transferredCount = context.tryInsert(itemStack, otherItem);
             otherItem.shrink(transferredCount);
@@ -191,7 +196,7 @@ public interface ContainerItemStorage extends ItemStorage {
             }
         } else {
             ItemStackingContext context = new ItemStackingContext(holder, this, player);
-            if (scheme.removeOtherStackedOnMe(clickAction, itemHeldByCursor, extractSingleItemOnly)) {
+            if (scheme.removeOtherStackedOnMe(clickAction) && (itemHeldByCursor.isEmpty() || extractSingleItemOnly)) {
                 if (slot.allowModification(player)) {
                     ItemStack itemRemainder = context.removeOne(itemStack, itemHeldByCursor).item();
                     if (!itemRemainder.isEmpty()) {
@@ -210,7 +215,7 @@ public interface ContainerItemStorage extends ItemStorage {
 
                 this.broadcastChangesOnContainerMenu(itemStack, player);
                 return true;
-            } else if (scheme.insertOtherStackedOnMe(clickAction, itemHeldByCursor, extractSingleItemOnly)) {
+            } else if (scheme.insertOtherStackedOnMe(clickAction) && !itemHeldByCursor.isEmpty()) {
                 if (slot.allowModification(player)) {
                     int transferredCount = context.tryInsert(itemStack, itemHeldByCursor);
                     itemHeldByCursor.shrink(transferredCount);

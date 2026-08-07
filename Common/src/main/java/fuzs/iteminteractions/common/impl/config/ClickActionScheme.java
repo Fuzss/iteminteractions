@@ -6,65 +6,40 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.inventory.ClickAction;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.Locale;
 
 public enum ClickActionScheme implements StringRepresentable {
-    SPLIT_INPUT {
-        @Override
-        public boolean insertStackedOnOther(ClickAction clickAction, ItemStack otherItem, boolean extractSingleItemOnly) {
-            return clickAction == ClickAction.PRIMARY && (!otherItem.isEmpty() || extractSingleItemOnly);
-        }
-
-        @Override
-        public boolean removeStackedOnOther(ClickAction clickAction, ItemStack otherItem, boolean extractSingleItemOnly) {
-            return clickAction == ClickAction.SECONDARY && (otherItem.isEmpty() || extractSingleItemOnly);
-        }
-
-        @Override
-        public boolean insertOtherStackedOnMe(ClickAction clickAction, ItemStack itemHeldByCursor, boolean extractSingleItemOnly) {
-            return clickAction == ClickAction.PRIMARY && !itemHeldByCursor.isEmpty();
-        }
-
-        @Override
-        public boolean removeOtherStackedOnMe(ClickAction clickAction, ItemStack itemHeldByCursor, boolean extractSingleItemOnly) {
-            return clickAction == ClickAction.SECONDARY && (itemHeldByCursor.isEmpty() || extractSingleItemOnly);
-        }
-    },
-    SINGLE_INPUT {
-        @Override
-        public boolean insertStackedOnOther(ClickAction clickAction, ItemStack otherItem, boolean extractSingleItemOnly) {
-            return clickAction == ClickAction.SECONDARY && !otherItem.isEmpty() || extractSingleItemOnly;
-        }
-
-        @Override
-        public boolean removeStackedOnOther(ClickAction clickAction, ItemStack otherItem, boolean extractSingleItemOnly) {
-            return clickAction == ClickAction.SECONDARY && (otherItem.isEmpty() || extractSingleItemOnly);
-        }
-
-        @Override
-        public boolean insertOtherStackedOnMe(ClickAction clickAction, ItemStack itemHeldByCursor, boolean extractSingleItemOnly) {
-            return (clickAction == ClickAction.SECONDARY || extractSingleItemOnly) && !itemHeldByCursor.isEmpty();
-        }
-
-        @Override
-        public boolean removeOtherStackedOnMe(ClickAction clickAction, ItemStack itemHeldByCursor, boolean extractSingleItemOnly) {
-            return clickAction == ClickAction.SECONDARY && (itemHeldByCursor.isEmpty() || extractSingleItemOnly);
-        }
-    };
+    SPLIT_INPUT(ClickAction.PRIMARY, ClickAction.SECONDARY),
+    SINGLE_INPUT(ClickAction.SECONDARY, ClickAction.SECONDARY);
 
     public static final Codec<ClickActionScheme> CODEC = StringRepresentable.fromEnum(ClickActionScheme::values);
     public static final StreamCodec<ByteBuf, ClickActionScheme> STREAM_CODEC = ExtraStreamCodecs.fromEnum(
             ClickActionScheme.class);
 
-    public abstract boolean insertStackedOnOther(ClickAction clickAction, ItemStack otherItem, boolean extractSingleItemOnly);
+    private final ClickAction insert;
+    private final ClickAction remove;
 
-    public abstract boolean removeStackedOnOther(ClickAction clickAction, ItemStack otherItem, boolean extractSingleItemOnly);
+    ClickActionScheme(ClickAction insert, ClickAction remove) {
+        this.insert = insert;
+        this.remove = remove;
+    }
 
-    public abstract boolean insertOtherStackedOnMe(ClickAction clickAction, ItemStack itemHeldByCursor, boolean extractSingleItemOnly);
+    public boolean insertStackedOnOther(ClickAction clickAction) {
+        return clickAction == this.insert;
+    }
 
-    public abstract boolean removeOtherStackedOnMe(ClickAction clickAction, ItemStack itemHeldByCursor, boolean extractSingleItemOnly);
+    public boolean removeStackedOnOther(ClickAction clickAction) {
+        return clickAction == this.remove;
+    }
+
+    public boolean insertOtherStackedOnMe(ClickAction clickAction) {
+        return clickAction == this.insert;
+    }
+
+    public boolean removeOtherStackedOnMe(ClickAction clickAction) {
+        return clickAction == this.remove;
+    }
 
     @Override
     public String getSerializedName() {
