@@ -35,7 +35,21 @@ public class ItemSlotMouseActionHandler {
         if (!itemHeldByCursor.isEmpty()) {
             for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
                 if (itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction && customMouseAction.matches(
-                        itemHeldByCursor) && customMouseAction.onMouseClicked(event, itemHeldByCursor)) {
+                        itemHeldByCursor) && customMouseAction.onMouseClicked(event,
+                        OptionalInt.empty(),
+                        itemHeldByCursor)) {
+                    return EventResult.INTERRUPT;
+                }
+            }
+        }
+
+        if (screen.hoveredSlot != null && screen.hoveredSlot.hasItem()) {
+            for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
+                if (itemMouseAction.matches(screen.hoveredSlot)
+                        && itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction
+                        && customMouseAction.onMouseClicked(event,
+                        OptionalInt.of(screen.hoveredSlot.index),
+                        screen.hoveredSlot.getItem())) {
                     return EventResult.INTERRUPT;
                 }
             }
@@ -49,7 +63,21 @@ public class ItemSlotMouseActionHandler {
         if (!itemHeldByCursor.isEmpty()) {
             for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
                 if (itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction && customMouseAction.matches(
-                        itemHeldByCursor) && customMouseAction.onMouseReleased(event, itemHeldByCursor)) {
+                        itemHeldByCursor) && customMouseAction.onMouseReleased(event,
+                        OptionalInt.empty(),
+                        itemHeldByCursor)) {
+                    return EventResult.INTERRUPT;
+                }
+            }
+        }
+
+        if (screen.hoveredSlot != null && screen.hoveredSlot.hasItem()) {
+            for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
+                if (itemMouseAction.matches(screen.hoveredSlot)
+                        && itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction
+                        && customMouseAction.onMouseReleased(event,
+                        OptionalInt.of(screen.hoveredSlot.index),
+                        screen.hoveredSlot.getItem())) {
                     return EventResult.INTERRUPT;
                 }
             }
@@ -63,7 +91,25 @@ public class ItemSlotMouseActionHandler {
         if (!itemHeldByCursor.isEmpty()) {
             for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
                 if (itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction && customMouseAction.matches(
-                        itemHeldByCursor) && customMouseAction.onMouseDragged(event, dragX, dragY, itemHeldByCursor)) {
+                        itemHeldByCursor) && customMouseAction.onMouseDragged(event,
+                        dragX,
+                        dragY,
+                        OptionalInt.empty(),
+                        itemHeldByCursor)) {
+                    return EventResult.INTERRUPT;
+                }
+            }
+        }
+
+        if (screen.hoveredSlot != null && screen.hoveredSlot.hasItem()) {
+            for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
+                if (itemMouseAction.matches(screen.hoveredSlot)
+                        && itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction
+                        && customMouseAction.onMouseDragged(event,
+                        dragX,
+                        dragY,
+                        OptionalInt.of(screen.hoveredSlot.index),
+                        screen.hoveredSlot.getItem())) {
                     return EventResult.INTERRUPT;
                 }
             }
@@ -73,6 +119,7 @@ public class ItemSlotMouseActionHandler {
     }
 
     public static EventResult onBeforeMouseScroll(AbstractContainerScreen<?> screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        // The hovered slot case for this event is already handled by vanilla.
         ItemStack itemHeldByCursor = screen.getMenu().getCarried();
         if (!itemHeldByCursor.isEmpty()) {
             for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {

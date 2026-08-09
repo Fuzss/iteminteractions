@@ -35,17 +35,17 @@ public interface CustomItemSlotMouseAction extends ItemSlotMouseAction {
     /**
      * This only runs for the {@link AbstractContainerMenu#carried carried item}.
      */
-    boolean onMouseClicked(MouseButtonEvent event, ItemStack itemStack);
+    boolean onMouseClicked(MouseButtonEvent event, OptionalInt slotIndex, ItemStack itemStack);
 
     /**
      * This only runs for the {@link AbstractContainerMenu#carried carried item}.
      */
-    boolean onMouseReleased(MouseButtonEvent event, ItemStack itemStack);
+    boolean onMouseReleased(MouseButtonEvent event, OptionalInt slotIndex, ItemStack itemStack);
 
     /**
      * This only runs for the {@link AbstractContainerMenu#carried carried item}.
      */
-    boolean onMouseDragged(MouseButtonEvent event, double dragX, double dragY, ItemStack itemStack);
+    boolean onMouseDragged(MouseButtonEvent event, double dragX, double dragY, OptionalInt slotIndex, ItemStack itemStack);
 
     boolean isDragging();
 

@@ -15,7 +15,6 @@ import fuzs.puzzleslib.common.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableValue;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.ItemSlotMouseAction;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -51,30 +50,6 @@ public class ClientEventHandler {
             SoundEvents.BUNDLE_REMOVE_ONE);
 
     private static ControlScheme lastSentControlScheme = ControlScheme.DEFAULT;
-
-    /**
-     * Shows the item tooltip for the item held by the cursor; to be used with the single item moving feature to be able
-     * to continuously see what's going on.
-     *
-     * @see AbstractContainerScreen#extractTooltip(GuiGraphicsExtractor, int, int)
-     */
-    public static void onAfterBackground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()) {
-            return;
-        }
-
-        ItemStack itemHeldByCursor = screen.getMenu().getCarried();
-        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemHeldByCursor);
-        if (holder.allowModification(itemHeldByCursor, screen.minecraft.player) && holder.hasContents(itemHeldByCursor,
-                screen.minecraft.player)) {
-            guiGraphics.setTooltipForNextFrame(screen.getFont(),
-                    screen.getTooltipFromContainerItem(itemHeldByCursor),
-                    itemHeldByCursor.getTooltipImage(),
-                    mouseX,
-                    mouseY,
-                    itemHeldByCursor.get(DataComponents.TOOLTIP_STYLE));
-        }
-    }
 
     public static EventResult onPlaySoundAtEntity(Level level, Entity entity, MutableValue<Holder<SoundEvent>> soundEvent, MutableValue<SoundSource> soundSource, MutableFloat soundVolume, MutableFloat soundPitch) {
         // Prevent the bundle sounds from being spammed when dragging.
