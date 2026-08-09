@@ -11,7 +11,6 @@ import fuzs.iteminteractions.common.impl.config.ItemStorageTooltip;
 import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.common.api.client.core.v1.context.ClientTooltipComponentsContext;
 import fuzs.puzzleslib.common.api.client.core.v1.context.KeyMappingsContext;
-import fuzs.puzzleslib.common.api.client.event.v1.ClientTickEvents;
 import fuzs.puzzleslib.common.api.client.event.v1.entity.player.ClientPlayerNetworkEvents;
 import fuzs.puzzleslib.common.api.client.event.v1.gui.*;
 import fuzs.puzzleslib.common.api.client.key.v1.KeyActivationContext;
@@ -31,7 +30,6 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(ItemHeldByCursorTooltip::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(ItemStorageTooltip::onBeforeKeyPressed);
-        ClientTickEvents.END.register(ItemSlotMouseActionHandler::onEndClientTick);
         ScreenEvents.afterBackground(AbstractContainerScreen.class)
                 .register(ItemSlotMouseActionHandler::onAfterBackground);
         ExtractContainerScreenContentsCallback.EVENT.register(ItemSlotMouseActionHandler::onAfterForeground);

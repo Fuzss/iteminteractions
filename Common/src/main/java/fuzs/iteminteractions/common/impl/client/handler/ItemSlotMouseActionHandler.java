@@ -3,7 +3,6 @@ package fuzs.iteminteractions.common.impl.client.handler;
 import fuzs.iteminteractions.common.impl.client.gui.CustomItemSlotMouseAction;
 import fuzs.puzzleslib.common.api.client.gui.v2.ScreenHelper;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.ItemSlotMouseAction;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -14,16 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import java.util.OptionalInt;
 
 public class ItemSlotMouseActionHandler {
-
-    public static void onEndClientTick(Minecraft minecraft) {
-        if (minecraft.gui.screen() instanceof AbstractContainerScreen<?> screen) {
-            for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
-                if (itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction) {
-//                    customMouseAction.onContainerTick();
-                }
-            }
-        }
-    }
 
     public static void onAfterBackground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {

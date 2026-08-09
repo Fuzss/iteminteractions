@@ -22,8 +22,6 @@ public interface CustomItemSlotMouseAction extends ItemSlotMouseAction {
 
     boolean matches(ItemStack itemStack);
 
-    void onContainerTick();
-
     /**
      * This always runs regardless of {@link #matches(ItemStack)}
      */
