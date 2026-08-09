@@ -11,6 +11,7 @@ import fuzs.iteminteractions.common.impl.config.ItemStorageTooltip;
 import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.common.api.client.core.v1.context.ClientTooltipComponentsContext;
 import fuzs.puzzleslib.common.api.client.core.v1.context.KeyMappingsContext;
+import fuzs.puzzleslib.common.api.client.event.v1.ClientTickEvents;
 import fuzs.puzzleslib.common.api.client.event.v1.entity.player.ClientPlayerNetworkEvents;
 import fuzs.puzzleslib.common.api.client.event.v1.gui.*;
 import fuzs.puzzleslib.common.api.client.key.v1.KeyActivationContext;
@@ -26,23 +27,24 @@ public class ItemInteractionsClient implements ClientModConstructor {
     }
 
     private static void registerEventHandlers() {
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(ItemHeldByCursorTooltip::onBeforeKeyPressed);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(ItemStorageTooltip::onBeforeKeyPressed);
+        ClientTickEvents.END.register(ItemSlotMouseActionHandler::onEndClientTick);
+        ScreenEvents.afterBackground(AbstractContainerScreen.class)
+                .register(ItemSlotMouseActionHandler::onAfterBackground);
+        ExtractContainerScreenContentsCallback.EVENT.register(ItemSlotMouseActionHandler::onAfterForeground);
         ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, ItemSlotMouseActionHandler::onBeforeMouseClicked);
         ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, ItemSlotMouseActionHandler::onBeforeMouseRelease);
         ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, ItemSlotMouseActionHandler::onBeforeMouseDragged);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(ItemHeldByCursorTooltip::onBeforeKeyPressed);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(ItemStorageTooltip::onBeforeKeyPressed);
         ScreenMouseEvents.beforeMouseScroll(AbstractContainerScreen.class)
                 .register(ItemSlotMouseActionHandler::onBeforeMouseScroll);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(ItemSlotMouseActionHandler::onBeforeKeyPress);
-        ScreenEvents.afterBackground(AbstractContainerScreen.class)
-                .register(ItemSlotMouseActionHandler::onAfterBackground);
-        ExtractContainerScreenContentsCallback.EVENT.register(ItemSlotMouseActionHandler::onAfterForeground);
         PlaySoundEvents.AT_ENTITY.register(ClientEventHandler::onPlaySoundAtEntity);
         ItemTooltipCallback.EVENT.register(ClientEventHandler::onItemTooltip);
         ScreenEvents.afterInit(AbstractContainerScreen.class).register(ClientEventHandler::onAfterInit);

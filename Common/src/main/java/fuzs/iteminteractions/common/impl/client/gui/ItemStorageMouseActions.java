@@ -44,6 +44,8 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     @Nullable
     private ClickAction clickAction;
     private final Stack<ItemSlot> nestedStorageItem = new Stack<>();
+    private OptionalInt nestedStorageItemSlot = OptionalInt.of(-1);
+    private boolean nestedInItemHeldByCursor;
 
     public ItemStorageMouseActions(AbstractContainerScreen<?> screen) {
         super(screen.minecraft);
@@ -58,6 +60,21 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     @Override
     public boolean matches(ItemStack itemStack) {
         return !ItemStorageHolder.ofItem(itemStack).isEmpty();
+    }
+
+    @Override
+    public void onContainerTick() {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()
+                && this.nestedInItemHeldByCursor) {
+            this.nestedInItemHeldByCursor = false;
+            if (!this.nestedStorageItem.isEmpty()) {
+                ItemStack itemStack = this.screen.getMenu().getCarried();
+                ItemSlot itemSlot = this.nestedStorageItem.getFirst();
+                ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
+                holder.storage().toggleSelectedItem(itemStack, this.minecraft.player, itemSlot.slotNum(), false);
+                this.nestedStorageItem.clear();
+            }
+        }
     }
 
     @Override
@@ -322,8 +339,8 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             }
         }
 
-        if (itemStack == this.screen.getMenu().getCarried()
-                && !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed() && slotIndex.isEmpty()
+                && this.nestedStorageItem.isEmpty()) {
             return false;
         }
 
@@ -398,20 +415,22 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             return false;
         }
 
-        if (itemStack == this.screen.getMenu().getCarried()
-                && !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed() && slotIndex.isEmpty()
+                && this.nestedStorageItem.isEmpty()) {
             return false;
         }
 
         ItemStack storageItem = this.getStorageItem(itemStack);
         ItemStorageHolder holder = ItemStorageHolder.ofItem(storageItem);
         if (this.allowModification(holder, this.screen.hoveredSlot, slotIndex, storageItem)) {
-            if (event.isSelection()) {
-                this.pushNestedStorageItem(holder, storageItem);
-                return true;
-            } else if (event.key() == InputConstants.KEY_BACKSPACE) {
-                this.popNestedStorageItem(itemStack);
-                return true;
+            if (ItemInteractions.CONFIG.get(ClientConfig.class).nestedItemTooltips) {
+                if (event.isSelection()) {
+                    this.pushNestedStorageItem(holder, storageItem, slotIndex.isEmpty());
+                    return true;
+                } else if (event.key() == InputConstants.KEY_BACKSPACE) {
+                    this.popNestedStorageItem(itemStack);
+                    return true;
+                }
             }
 
             int scrollX = 0;
@@ -442,35 +461,44 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         return false;
     }
 
-    private ItemStack getStorageItem(ItemStack itemStack) {
-        return this.nestedStorageItem.isEmpty() ? itemStack : this.nestedStorageItem.peek().item();
+    private ItemStack getStorageItem(ItemStack originalItem) {
+        return this.nestedStorageItem.isEmpty() ? originalItem : this.nestedStorageItem.peek().item();
     }
 
-    private void pushNestedStorageItem(ItemStorageHolder holder, ItemStack storageItem) {
-        Container container = holder.getItemContainer(storageItem, this.minecraft.player);
-        int selectedItem = holder.storage().getSelectedItem(storageItem, this.minecraft.player);
+    private void pushNestedStorageItem(ItemStorageHolder holder, ItemStack itemStack, boolean itemHeldByCursor) {
+        Container container = holder.getItemContainer(itemStack, this.minecraft.player);
+        int selectedItem = holder.storage().getSelectedItem(itemStack, this.minecraft.player);
         ItemStack item = container.getItem(selectedItem);
         ItemStorageHolder itemHolder = ItemStorageHolder.ofItem(item);
         if (!itemHolder.isEmpty()) {
+            if (this.nestedStorageItem.isEmpty()) {
+                this.nestedInItemHeldByCursor = itemHeldByCursor;
+            }
+
             itemHolder.storage()
-                    .toggleSelectedItem(storageItem, this.minecraft.player, SelectedItem.DEFAULT_SELECTED_ITEM, false);
+                    .toggleSelectedItem(itemStack, this.minecraft.player, SelectedItem.DEFAULT_SELECTED_ITEM, false);
             this.nestedStorageItem.push(new ItemSlot(item.copy(), selectedItem));
         }
     }
 
-    private void popNestedStorageItem(ItemStack itemStack) {
+    private void popNestedStorageItem(ItemStack originalItem) {
         if (!this.nestedStorageItem.isEmpty()) {
-            ItemSlot itemSlot = this.nestedStorageItem.pop();
-            ItemStack item = this.getStorageItem(itemStack);
+            int slotNum = this.nestedStorageItem.pop().slotNum();
+            ItemStack item = this.getStorageItem(originalItem);
             ItemStorageHolder itemHolder = ItemStorageHolder.ofItem(item);
-            itemHolder.storage().toggleSelectedItem(item, this.minecraft.player, itemSlot.slotNum(), false);
+            itemHolder.storage().toggleSelectedItem(item, this.minecraft.player, slotNum, false);
+            if (this.nestedStorageItem.isEmpty()) {
+                this.nestedInItemHeldByCursor = false;
+            }
         }
     }
 
     @Override
     public void onStopHovering(Slot slot) {
-        this.nestedStorageItem.clear();
-        super.onStopHovering(slot);
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()) {
+            this.nestedStorageItem.clear();
+            super.onStopHovering(slot);
+        }
     }
 
     /**

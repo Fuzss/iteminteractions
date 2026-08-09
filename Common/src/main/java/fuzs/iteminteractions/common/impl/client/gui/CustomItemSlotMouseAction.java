@@ -22,6 +22,8 @@ public interface CustomItemSlotMouseAction extends ItemSlotMouseAction {
 
     boolean matches(ItemStack itemStack);
 
+    void onContainerTick();
+
     /**
      * This always runs regardless of {@link #matches(ItemStack)}
      */
@@ -32,19 +34,10 @@ public interface CustomItemSlotMouseAction extends ItemSlotMouseAction {
      */
     void onExtractForeground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks);
 
-    /**
-     * This only runs for the {@link AbstractContainerMenu#carried carried item}.
-     */
     boolean onMouseClicked(MouseButtonEvent event, OptionalInt slotIndex, ItemStack itemStack);
 
-    /**
-     * This only runs for the {@link AbstractContainerMenu#carried carried item}.
-     */
     boolean onMouseReleased(MouseButtonEvent event, OptionalInt slotIndex, ItemStack itemStack);
 
-    /**
-     * This only runs for the {@link AbstractContainerMenu#carried carried item}.
-     */
     boolean onMouseDragged(MouseButtonEvent event, double dragX, double dragY, OptionalInt slotIndex, ItemStack itemStack);
 
     boolean isDragging();

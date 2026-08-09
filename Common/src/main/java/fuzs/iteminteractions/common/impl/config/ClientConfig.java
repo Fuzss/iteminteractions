@@ -38,6 +38,11 @@ public class ClientConfig implements ConfigCore {
             "The split scheme mirrors vanilla's bundle mechanics, while the single scheme maps everything to the right mouse button; providing more overall flexibility."
     })
     public ClickActionScheme controlScheme = ControlScheme.DEFAULT.controlScheme();
+    @Config(description = {
+            "Allow navigating nested storage item contents by pressing any selection key while the respective item is highlighted on the current tooltip. Use backspace to go back to the previous storage item contents.",
+            "Contents are only shown visually; they cannot be interacted with."
+    })
+    public boolean nestedItemTooltips = true;
 
     public boolean extractSingleItemOnly() {
         return this.singleItemMovement.isUsed()
