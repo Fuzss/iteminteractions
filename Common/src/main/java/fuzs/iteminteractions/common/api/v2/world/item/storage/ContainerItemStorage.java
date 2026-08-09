@@ -29,7 +29,7 @@ public interface ContainerItemStorage extends ItemStorage {
         return ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.getOrDefault(player, ControlScheme.DEFAULT).moveSingleItem();
     }
 
-    default ClickActionScheme controlScheme(ItemStack itemStack, Player player) {
+    private ClickActionScheme controlScheme(ItemStack itemStack, Player player) {
         if (this.extractSingleItemOnly(itemStack, player)) {
             return ClickActionScheme.SPLIT_INPUT;
         } else {
