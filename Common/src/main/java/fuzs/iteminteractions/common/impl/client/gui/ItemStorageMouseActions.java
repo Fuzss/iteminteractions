@@ -489,8 +489,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     @Override
     public void onStopHovering(Slot slot) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()) {
-            this.nestedStorageItem.clear();
-            this.nestedStorageItemSlot = OptionalInt.of(-1);
+            this.clearNestedStorageItem(slot.getItem());
             super.onStopHovering(slot);
         }
     }
@@ -500,14 +499,26 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
      */
     @Override
     public void onSlotClicked(Slot slot, ContainerInput containerInput) {
-        this.nestedStorageItem.clear();
-        this.nestedStorageItemSlot = OptionalInt.of(-1);
+        this.clearNestedStorageItem(slot.getItem());
         if (containerInput == ContainerInput.QUICK_MOVE || containerInput == ContainerInput.SWAP) {
             this.toggleSelectedItem(slot.getItem(),
                     OptionalInt.of(slot.index),
                     SelectedItem.DEFAULT_SELECTED_ITEM,
                     true);
         }
+    }
+
+    private void clearNestedStorageItem(ItemStack itemStack) {
+        if (!this.nestedStorageItem.isEmpty()) {
+            // Attempt resetting the selected item on the client so it's inline with the server again to avoid desyncing.
+            int slotNum = this.nestedStorageItem.getFirst().slotNum();
+            ItemStorageHolder.ofItem(itemStack)
+                    .storage()
+                    .toggleSelectedItem(itemStack, this.minecraft.player, slotNum, false);
+            this.nestedStorageItem.clear();
+        }
+
+        this.nestedStorageItemSlot = OptionalInt.of(-1);
     }
 
     @Override

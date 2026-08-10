@@ -76,7 +76,7 @@ public class ClientEventHandler {
     }
 
     public static void onItemTooltip(ItemStack itemStack, List<Component> tooltipLines, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag) {
-        // Hide vanilla shulker box contents on tooltips, they are no longer necessary with our custom rendering.
+        // Hide vanilla container contents on tooltips, they are no longer necessary with our custom implementation.
         if (itemStack.has(DataComponents.CONTAINER) && !ItemStorageHolder.ofItem(itemStack).isEmpty()) {
             tooltipLines.removeIf((Component component) -> {
                 if (component.getContents() instanceof TranslatableContents contents) {
