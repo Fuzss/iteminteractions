@@ -190,6 +190,7 @@ public interface ContainerItemStorage extends ItemStorage {
         if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
             if (!extractSingleItemOnly) {
                 this.toggleSelectedItem(itemStack, player, SelectedItem.DEFAULT_SELECTED_ITEM, true);
+                slot.set(slot.getItem());
                 return false;
             } else {
                 return true;
@@ -213,6 +214,7 @@ public interface ContainerItemStorage extends ItemStorage {
                     }
                 }
 
+                slot.set(slot.getItem());
                 this.broadcastChangesOnContainerMenu(itemStack, player);
                 return true;
             } else if (scheme.insertOtherStackedOnMe(clickAction) && !itemHeldByCursor.isEmpty()) {
@@ -228,10 +230,12 @@ public interface ContainerItemStorage extends ItemStorage {
                     }
                 }
 
+                slot.set(slot.getItem());
                 this.broadcastChangesOnContainerMenu(itemStack, player);
                 return true;
             } else {
                 this.toggleSelectedItem(itemStack, player, SelectedItem.DEFAULT_SELECTED_ITEM, true);
+                slot.set(slot.getItem());
                 return false;
             }
         }
