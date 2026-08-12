@@ -29,9 +29,9 @@ vanilla items: all shulker boxes, all bundles, and the ender chest.
 ## Configuration (for Minecraft 1.21.1+)
 
 All item contents providers are found at the following locations:
-> `data/<namespace>/iteminteractions/item_container_providers/<path>.json` (for Minecraft 1.21.4+)
+> `data/<namespace>/iteminteractions/item_container_provider/<path>.json` (for Minecraft 1.21.4+)
 
-> `data/<namespace>/item_container_providers/<path>.json` (for Minecraft 1.21.1-1.21.3)
+> `data/<namespace>/item_container_provider/<path>.json` (for Minecraft 1.21.1-1.21.3)
 
 The placeholder `<namespace>:<path>` represents the arbitrary provider id.
 
