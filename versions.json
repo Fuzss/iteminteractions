@@ -5,8 +5,10 @@
     "26.1.x": "maintained",
     "26.2.x": "primary"
   },
-  "properties": {
-    "distributions.github.slug": "item-interactions"
+  "distributions": {
+    "github": {
+      "slug": "item-interactions"
+    }
   },
   "published": true
 }
